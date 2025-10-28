@@ -1,6 +1,6 @@
 let currentUser = null;
 
-// --- Auth ---
+// --- Authentification ---
 function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -31,6 +31,7 @@ function logout() {
   firebase.auth().signOut().then(() => {
     document.getElementById("app").style.display = "none";
     document.getElementById("login-screen").style.display = "block";
+    closeCenterBubble();
   });
 }
 
@@ -57,7 +58,7 @@ function loadBubbles() {
     const y = centerY + radius * Math.sin(angle);
 
     const bubble = document.createElement("div");
-    bubble.className = "bulle fallback"; // fallback par défaut
+    bubble.className = "bulle fallback";
     bubble.textContent = name;
 
     const img = new Image();
@@ -72,90 +73,110 @@ function loadBubbles() {
       bubble.classList.remove("fallback");
     };
 
+    // En cas d'erreur (comme avec tes liens), garde le fallback
     img.onerror = () => {
-      console.warn("Échec du chargement :", url);
-      // garde le fallback (texte + fond doré)
+      console.warn("Image non chargée :", url);
     };
 
     bubble.addEventListener("click", (e) => {
       e.stopPropagation();
-      showCenterBubble(name, url);
+      showCenterBubble(name);
     });
 
     bubble.style.left = (x - 50) + "px";
     bubble.style.top = (y - 50) + "px";
     container.appendChild(bubble);
   });
+
+  // Lancer les flocons après le chargement initial
+  startSnowflakes();
 }
 
-// --- Bulle centrale simple (overlay) ---
-function showCenterBubble(name, url) {
-  let overlay = document.getElementById("center-overlay");
-  if (!overlay) {
-    overlay = document.createElement("div");
-    overlay.id = "center-overlay";
-    overlay.style.cssText = `
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 25;
-    `;
-    document.body.appendChild(overlay);
+// --- Flocons ---
+function startSnowflakes() {
+  if (window.snowflakesStarted) return;
+  window.snowflakesStarted = true;
 
-    overlay.addEventListener("click", () => {
-      document.body.removeChild(overlay);
-    });
+  function createSnowflake() {
+    const flakes = "❄❅❆";
+    const snowflake = document.createElement("div");
+    snowflake.className = "snowflake";
+    snowflake.innerHTML = flakes.charAt(Math.floor(Math.random() * flakes.length));
+    snowflake.style.left = Math.random() * 100 + "vw";
+    snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+    snowflake.style.fontSize = (Math.random() * 12 + 14) + "px";
+    snowflake.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    document.getElementById("snowflakes")?.appendChild(snowflake);
+    setTimeout(() => snowflake.remove(), 10000);
   }
 
-  const content = document.createElement("div");
-  content.style.cssText = `
-    width: 300px;
-    height: 300px;
-    background: #48dbfb;
-    border-radius: 50%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-  `;
-  content.innerHTML = `
+  setInterval(createSnowflake, 400);
+  for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
+}
+
+// --- Bulle centrale ---
+function showCenterBubble(name) {
+  closeCenterBubble(); // Fermer l'existante
+
+  const overlay = document.createElement("div");
+  overlay.id = "center-overlay";
+  document.body.appendChild(overlay);
+
+  const bubble = document.createElement("div");
+  bubble.id = "center-bubble";
+  bubble.innerHTML = `
     <h3>${name}</h3>
-    <textarea id="list-input" placeholder="Écris ta liste..." 
-      style="width:90%;height:120px;margin:10px 0;padding:10px;border:none;border-radius:8px;"></textarea>
+    <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
     <button onclick="saveList('${name}')">Sauvegarder</button>
   `;
-  overlay.appendChild(content);
-  content.addEventListener("click", (e) => e.stopPropagation());
+  overlay.appendChild(bubble);
 
+  // Charger la liste existante
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
   });
+
+  // Animation d'apparition
+  setTimeout(() => overlay.classList.add("active"), 10);
+
+  // Clic en dehors
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) closeCenterBubble();
+  });
+}
+
+function closeCenterBubble() {
+  const overlay = document.getElementById("center-overlay");
+  if (overlay) {
+    overlay.classList.remove("active");
+    setTimeout(() => overlay.remove(), 300);
+  }
 }
 
 // --- Sauvegarde ---
 function saveList(name) {
   const textarea = document.getElementById("list-input");
-  if (!textarea?.value.trim()) {
+  if (!textarea || !textarea.value.trim()) {
     alert("La liste ne peut pas être vide.");
     return;
   }
+
   firebase.firestore().collection("listes").doc(name).set({
     text: textarea.value.trim(),
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-  }).then(() => {
-    alert("✅ Sauvegardé !");
-    document.getElementById("center-overlay")?.remove();
-  }).catch(err => alert("❌ " + err.message));
+  })
+  .then(() => {
+    alert("✅ Liste sauvegardée !");
+    closeCenterBubble();
+  })
+  .catch(error => {
+    alert("❌ " + error.message);
+  });
 }
 
-// --- Auth state ---
+// --- État d'authentification ---
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
