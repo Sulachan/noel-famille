@@ -14,6 +14,20 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
+/* Voile sombre pour améliorer la lisibilité (au-dessus du fond, en dessous du contenu) */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Écran de connexion */
 #login-screen {
   position: absolute;
   top: 50%;
@@ -24,6 +38,7 @@ body {
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   text-align: center;
+  z-index: 10; /* Premier plan */
 }
 
 #login-screen input {
@@ -45,6 +60,7 @@ body {
   cursor: pointer;
 }
 
+/* Bouton déconnexion */
 #logout-btn {
   position: absolute;
   top: 20px;
@@ -55,6 +71,7 @@ body {
   padding: 8px 15px;
   border-radius: 5px;
   cursor: pointer;
+  z-index: 10;
 }
 
 /* --- BULLES AVEC PHOTOS DORÉES --- */
@@ -69,6 +86,7 @@ body {
   cursor: pointer;
   background: transparent;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 10; /* Toujours au-dessus de tout */
 }
 
 .bulle img {
@@ -86,9 +104,10 @@ body {
   box-shadow:
     0 0 8px rgba(255, 215, 0, 0.6),
     0 4px 12px rgba(0,0,0,0.2);
-  border-color: #FFC000; /* Or plus chaud au survol */
+  border-color: #FFC000;
 }
 
+/* Bulle centrale (liste de Noël) */
 #center-bubble {
   position: absolute;
   top: 50%;
@@ -104,7 +123,7 @@ body {
   justify-content: center;
   color: white;
   box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-  z-index: 10;
+  z-index: 20; /* Au-dessus des bulles */
 }
 
 #center-bubble textarea {
@@ -127,3 +146,13 @@ body {
   cursor: pointer;
 }
 
+/* --- Flocons de neige (ajouté ici pour cohérence) --- */
+#snowflakes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2; /* Entre le voile (1) et le contenu (10+) */
+}
