@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🎄 Liste de Noël Famille</title>
+  <title>🎄 Listes de Noël</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 
@@ -19,53 +19,54 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 1; /* Au-dessus du fond, mais en dessous des bulles */
+  z-index: 2;
 }
 
 .snowflake {
   position: absolute;
   color: #fff;
-  font-size: 24px;
+  font-size: 20px;
   top: -30px;
   user-select: none;
-  opacity: 0.85;
+  opacity: 0.8;
   animation: fall linear forwards;
 }
 
 @keyframes fall {
   to {
-    transform: translateY(105vh);
+    transform: translateY(105vh) rotate(360deg);
   }
 }
 </style>
 
 <script>
-function createSnowflakes() {
-  const container = document.getElementById("snowflakes");
+function createSnowflake() {
   const flakes = "❄❅❆";
-  const count = 35;
+  const snowflake = document.createElement("div");
+  snowflake.className = "snowflake";
+  snowflake.innerHTML = flakes.charAt(Math.floor(Math.random() * flakes.length));
+  snowflake.style.left = Math.random() * 100 + "vw";
+  snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+  snowflake.style.fontSize = (Math.random() * 12 + 14) + "px";
+  snowflake.style.animationDuration = (Math.random() * 5 + 5) + "s";
+  document.getElementById("snowflakes").appendChild(snowflake);
 
-  for (let i = 0; i < count; i++) {
-    const snowflake = document.createElement("div");
-    snowflake.className = "snowflake";
-    snowflake.innerHTML = flakes.charAt(Math.floor(Math.random() * flakes.length));
-    snowflake.style.left = Math.random() * 100 + "vw";
-    snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-    snowflake.style.fontSize = (Math.random() * 16 + 14) + "px";
-    snowflake.style.animationDuration = (Math.random() * 6 + 5) + "s";
-    snowflake.style.animationDelay = Math.random() * 5 + "s";
-    container.appendChild(snowflake);
-  }
+  // Supprime le flocon après son animation pour éviter la surcharge
+  setTimeout(() => {
+    if (snowflake.parentNode) {
+      snowflake.parentNode.removeChild(snowflake);
+    }
+  }, 10000);
 }
 
-// Lancer les flocons
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", createSnowflakes);
-} else {
-  createSnowflakes();
+// Crée un flocon toutes les 400ms
+setInterval(createSnowflake, 400);
+
+// Crée quelques flocons au démarrage
+for (let i = 0; i < 15; i++) {
+  setTimeout(createSnowflake, i * 300);
 }
 </script>
-  </div>
 
   <div id="app" style="display:none;">
     <button id="logout-btn" onclick="logout()">Déconnexion</button>
@@ -99,6 +100,7 @@ if (document.readyState === "loading") {
 </body>
 
 </html>
+
 
 
 
