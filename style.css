@@ -11,10 +11,9 @@ body {
   height: 100vh;
   overflow: hidden;
   background: url('https://i.imgur.com/Zsp98RG.jpeg') center/cover fixed;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Voile sombre pour améliorer la lisibilité (au-dessus du fond, en dessous du contenu) */
+/* Voile sombre */
 body::before {
   content: "";
   position: fixed;
@@ -27,7 +26,7 @@ body::before {
   pointer-events: none;
 }
 
-/* Écran de connexion */
+/* Login */
 #login-screen {
   position: absolute;
   top: 50%;
@@ -38,7 +37,7 @@ body::before {
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   text-align: center;
-  z-index: 10; /* Premier plan */
+  z-index: 10;
 }
 
 #login-screen input {
@@ -60,7 +59,7 @@ body::before {
   cursor: pointer;
 }
 
-/* Bouton déconnexion */
+/* Déconnexion */
 #logout-btn {
   position: absolute;
   top: 20px;
@@ -74,7 +73,7 @@ body::before {
   z-index: 10;
 }
 
-/* --- BULLES AVEC PHOTOS DORÉES --- */
+/* Bulles */
 .bulle {
   position: absolute;
   width: 100px;
@@ -85,8 +84,8 @@ body::before {
   justify-content: center;
   cursor: pointer;
   background: transparent;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  z-index: 10; /* Toujours au-dessus de tout */
+  transition: transform 0.3s ease;
+  z-index: 10;
 }
 
 .bulle img {
@@ -94,7 +93,7 @@ body::before {
   height: 92px;
   border-radius: 50%;
   object-fit: cover;
-  border: 2px solid #FFD700; /* Or fin */
+  border: 2px solid #FFD700;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
 }
@@ -107,14 +106,32 @@ body::before {
   border-color: #FFC000;
 }
 
-/* Bulle centrale (liste de Noël) */
+/* Overlay central */
+#center-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#center-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+/* Bulle centrale */
 #center-bubble {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 300px;
-  height: 300px;
+  width: 280px;
+  height: 280px;
   background: #48dbfb;
   border-radius: 50%;
   display: flex;
@@ -122,31 +139,48 @@ body::before {
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-  z-index: 20; /* Au-dessus des bulles */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  transform: scale(0.2);
+  opacity: 0;
+  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+#center-overlay.active #center-bubble {
+  transform: scale(1);
+  opacity: 1;
+}
+
+#center-bubble h3 {
+  font-size: 22px;
+  margin-bottom: 10px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
 }
 
 #center-bubble textarea {
   width: 90%;
-  height: 150px;
-  margin-top: 10px;
+  height: 120px;
+  margin-top: 8px;
   padding: 10px;
   border: none;
   border-radius: 8px;
   font-size: 16px;
+  background: rgba(255,255,255,0.95);
+  resize: none;
 }
 
 #center-bubble button {
-  margin-top: 10px;
-  padding: 8px 15px;
+  margin-top: 12px;
+  padding: 8px 20px;
   background: white;
   color: #48dbfb;
+  font-weight: bold;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
-/* --- Flocons de neige (ajouté ici pour cohérence) --- */
+/* Flocons */
 #snowflakes {
   position: fixed;
   top: 0;
@@ -154,5 +188,21 @@ body::before {
   width: 100%;
   height: 100%;
   pointer-events: none;
-  z-index: 2; /* Entre le voile (1) et le contenu (10+) */
+  z-index: 2;
+}
+
+.snowflake {
+  position: absolute;
+  color: #fff;
+  font-size: 20px;
+  top: -30px;
+  user-select: none;
+  opacity: 0.85;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(105vh) rotate(360deg);
+  }
 }
