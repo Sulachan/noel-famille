@@ -18,21 +18,16 @@
     <p id="login-message"></p>
   </div>
 
-  <!-- Application (bulles) -->
+  <!-- Application -->
   <div id="app" style="display:none;">
     <button id="logout-btn" onclick="logout()">Déconnexion</button>
     <div id="bubbles"></div>
   </div>
 
-  <!-- Overlay + bulle centrale animée -->
-  <div id="center-overlay" style="display:none;" onclick="closeCenterBubble(event)">
-    <div id="center-bubble"></div>
-  </div>
-
-  <!-- Flocons de neige -->
+  <!-- Flocons -->
   <div id="snowflakes"></div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -49,7 +44,7 @@
     firebase.initializeApp(firebaseConfig);
   </script>
 
-  <!-- Flocons (script sécurisé) -->
+  <!-- Flocons script -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       function createSnowflake() {
@@ -61,15 +56,9 @@
         snowflake.style.opacity = Math.random() * 0.5 + 0.3;
         snowflake.style.fontSize = (Math.random() * 12 + 14) + "px";
         snowflake.style.animationDuration = (Math.random() * 5 + 5) + "s";
-        
-        const container = document.getElementById("snowflakes");
-        if (container) container.appendChild(snowflake);
-
-        setTimeout(() => {
-          if (snowflake.parentNode) snowflake.parentNode.removeChild(snowflake);
-        }, 10000);
+        document.getElementById("snowflakes")?.appendChild(snowflake);
+        setTimeout(() => snowflake.remove(), 10000);
       }
-
       setInterval(createSnowflake, 400);
       for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
     });
