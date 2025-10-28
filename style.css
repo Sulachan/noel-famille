@@ -13,7 +13,6 @@ body {
   background: url('https://i.imgur.com/Zsp98RG.jpeg') center/cover fixed;
 }
 
-/* Voile sombre */
 body::before {
   content: "";
   position: fixed;
@@ -23,10 +22,8 @@ body::before {
   height: 100%;
   background: rgba(0, 0, 0, 0.25);
   z-index: 1;
-  pointer-events: none;
 }
 
-/* Login */
 #login-screen {
   position: absolute;
   top: 50%;
@@ -59,7 +56,6 @@ body::before {
   cursor: pointer;
 }
 
-/* Déconnexion */
 #logout-btn {
   position: absolute;
   top: 20px;
@@ -82,117 +78,33 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  background: transparent;
+  z-index: 20;
   transition: transform 0.3s ease;
-  z-index: 20; /* ← doit être > que #snowflakes (2) et body::before (1) */
-  pointer-events: auto; /* ← important */
 }
 
-/* Bulle animée – part du cercle, va au centre */
-.bulle.animated {
-  position: fixed !important;
-  z-index: 30 !important;
-  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), 
-              box-shadow 0.4s ease;
+.bulle.fallback {
+  background: radial-gradient(circle, #FFD700, #FFA500);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
 }
 
-.bulle.animated img {
-  border: 3px solid gold;
-  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
-}
 .bulle img {
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #FFD700;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-.bulle:hover img {
-  transform: scale(1.05);
-  box-shadow:
-    0 0 8px rgba(255, 215, 0, 0.6),
-    0 4px 12px rgba(0,0,0,0.2);
-  border-color: #FFC000;
-}
-
-/* Overlay central */
-#center-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 15;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
-}
-
-#center-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-}
-
-/* Bulle centrale */
-#center-bubble {
-  width: 280px;
-  height: 280px;
-  background: #48dbfb;
+  object-fit: cover;
   border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
-  transform: scale(0.2);
-  opacity: 0;
-  transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+  border: 2px solid gold;
+  display: block;
 }
 
-#center-overlay.active #center-bubble {
-  transform: scale(1);
-  opacity: 1;
+.bulle:hover {
+  transform: translateY(-10px);
 }
 
-#center-bubble h3 {
-  font-size: 22px;
-  margin-bottom: 10px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-}
-
-#center-bubble textarea {
-  width: 90%;
-  height: 120px;
-  margin-top: 8px;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  background: rgba(255,255,255,0.95);
-  resize: none;
-}
-
-#center-bubble button {
-  margin-top: 12px;
-  padding: 8px 20px;
-  background: white;
-  color: #48dbfb;
-  font-weight: bold;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-}
-
-/* Flocons */
 #snowflakes {
   position: fixed;
   top: 0;
@@ -218,5 +130,3 @@ body::before {
     transform: translateY(105vh) rotate(360deg);
   }
 }
-
-
