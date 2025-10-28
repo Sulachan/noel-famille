@@ -42,7 +42,7 @@ function loadBubbles() {
   const photos = {
     "Maman": "https://i.imgur.com/88Fx119.jpeg",
     "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
-    "Anton": "https://i.imgur.com/3SN6pX7.jpeg",
+    "Anton": "https://i.imgur.com/qU270du.jpeg",
     "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
     "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
   };
@@ -125,4 +125,5 @@ firebase.auth().onAuthStateChanged(user => {
     loadBubbles();
   }
 });
+
 
