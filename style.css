@@ -6,9 +6,12 @@
 }
 
 body {
-  background: #e6f7ff;
-  overflow: hidden;
+  margin: 0;
+  padding: 0;
   height: 100vh;
+  overflow: hidden;
+  background: url('https://i.imgur.com/Zsp98RG.jpeg') center/cover fixed;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 #login-screen {
@@ -123,3 +126,4 @@ body {
   border-radius: 5px;
   cursor: pointer;
 }
+
