@@ -36,15 +36,15 @@ function logout() {
   });
 }
 
-// --- Chargement des bulles avec photos ---
+// --- Chargement des bulles ---
 function loadBubbles() {
-  // 🔸 Remplace ces URL par les tiennes depuis Imgur !
+  // 🔸 À METTRE À JOUR AVEC TES VRAIS LIENS D'IMAGE (i.imgur.com/... .jpg)
   const photos = {
-    "Maman": "https://i.imgur.com/88Fx119.jpeg",
-    "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
-    "Anton": "https://i.imgur.com/3SN6pX7.jpeg",
-    "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
-    "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
+    "Maman": "https://i.imgur.com/88Fx119.jpg",
+    "Papa": "https://i.imgur.com/lEa3Dky.jpg",
+    "Anton": "https://i.imgur.com/3SN6pX7.jpg",
+    "Ewan": "https://i.imgur.com/VzvtbSu.jpg",
+    "Sara": "https://i.imgur.com/rwnpdOV.jpg"
   };
 
   const container = document.getElementById("bubbles");
@@ -65,21 +65,18 @@ function loadBubbles() {
     const img = document.createElement("img");
     img.src = url;
     img.alt = name;
-    img.style.width = "80%";
-    img.style.height = "80%";
-    img.style.objectFit = "cover";
-    img.style.borderRadius = "50%";
+    img.loading = "lazy"; // meilleure performance
 
     bubble.appendChild(img);
     bubble.addEventListener("click", () => showBubbleDetails(name));
-    bubble.style.left = (x - 50) + "px";
-    bubble.style.top = (y - 50) + "px";
+    bubble.style.left = (x - 52) + "px"; // ajusté pour le padding
+    bubble.style.top = (y - 52) + "px";
 
     container.appendChild(bubble);
   });
 }
 
-// --- Afficher la bulle au centre avec la liste ---
+// --- Détails bulle ---
 function showBubbleDetails(name) {
   const centerBubble = document.getElementById("center-bubble");
   centerBubble.innerHTML = `
@@ -88,7 +85,6 @@ function showBubbleDetails(name) {
     <button onclick="saveList('${name}')">Sauvegarder</button>
   `;
 
-  // Charger la liste existante depuis Firestore
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
@@ -98,22 +94,16 @@ function showBubbleDetails(name) {
   centerBubble.style.display = "flex";
 }
 
-// --- Sauvegarder la liste ---
+// --- Sauvegarde ---
 function saveList(name) {
   const textarea = document.getElementById("list-input");
-  if (!textarea) {
-    console.error("Champ de texte introuvable");
-    return;
-  }
-
-  const text = textarea.value.trim();
-  if (text === "") {
+  if (!textarea || !textarea.value.trim()) {
     alert("La liste ne peut pas être vide.");
     return;
   }
 
   firebase.firestore().collection("listes").doc(name).set({
-    text: text,
+    text: textarea.value.trim(),
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   })
   .then(() => {
@@ -121,20 +111,17 @@ function saveList(name) {
     document.getElementById("center-bubble").style.display = "none";
   })
   .catch(error => {
-    console.error("Erreur sauvegarde :", error);
-    alert("❌ Erreur : " + error.message);
+    console.error("Erreur :", error);
+    alert("❌ " + error.message);
   });
 }
 
-// --- Écouter l’état de l’authentification ---
+// --- Auth state ---
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     document.getElementById("login-screen").style.display = "none";
     document.getElementById("app").style.display = "block";
     loadBubbles();
-  } else {
-    currentUser = null;
   }
 });
-
