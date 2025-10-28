@@ -1,4 +1,5 @@
 let currentUser = null;
+let currentCenterBubbleName = null;
 
 // --- Authentification ---
 function login() {
@@ -10,7 +11,6 @@ function login() {
   }
   firebase.auth().signInWithEmailAndPassword(email, password)
     .catch(error => {
-      console.error("Erreur login:", error);
       document.getElementById("login-message").innerText = "Erreur : " + error.message;
     });
 }
@@ -24,7 +24,6 @@ function createAccount() {
   }
   firebase.auth().createUserWithEmailAndPassword(email, password)
     .catch(error => {
-      console.error("Erreur création:", error);
       document.getElementById("login-message").innerText = "Erreur : " + error.message;
     });
 }
@@ -33,12 +32,13 @@ function logout() {
   firebase.auth().signOut().then(() => {
     document.getElementById("app").style.display = "none";
     document.getElementById("login-screen").style.display = "block";
+    document.getElementById("center-overlay").style.display = "none";
+    currentCenterBubbleName = null;
   });
 }
 
 // --- Chargement des bulles ---
 function loadBubbles() {
-  // 🔸 À METTRE À JOUR AVEC TES VRAIS LIENS D'IMAGE (i.imgur.com/... .jpg)
   const photos = {
     "Maman": "https://i.imgur.com/88Fx119.jpeg",
     "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
@@ -65,20 +65,51 @@ function loadBubbles() {
     const img = document.createElement("img");
     img.src = url;
     img.alt = name;
-    img.loading = "lazy"; // meilleure performance
+    img.loading = "lazy";
 
     bubble.appendChild(img);
     bubble.addEventListener("click", () => showBubbleDetails(name));
-    bubble.style.left = (x - 52) + "px"; // ajusté pour le padding
-    bubble.style.top = (y - 52) + "px";
+    bubble.style.left = (x - 50) + "px";
+    bubble.style.top = (y - 50) + "px";
 
     container.appendChild(bubble);
   });
 }
 
-// --- Détails bulle ---
+// --- Gestion bulle centrale ---
+function closeCenterBubble(event) {
+  if (event.target.closest("#center-bubble")) return;
+  hideCenterBubble();
+}
+
+function hideCenterBubble() {
+  const overlay = document.getElementById("center-overlay");
+  if (overlay.classList.contains("active")) {
+    overlay.classList.remove("active");
+    setTimeout(() => {
+      overlay.style.display = "none";
+      currentCenterBubbleName = null;
+    }, 500);
+  }
+}
+
 function showBubbleDetails(name) {
+  if (currentCenterBubbleName === name) return;
+
+  const overlay = document.getElementById("center-overlay");
+
+  if (currentCenterBubbleName) {
+    overlay.classList.remove("active");
+    setTimeout(() => openNewBubble(name), 500);
+  } else {
+    openNewBubble(name);
+  }
+}
+
+function openNewBubble(name) {
+  const overlay = document.getElementById("center-overlay");
   const centerBubble = document.getElementById("center-bubble");
+
   centerBubble.innerHTML = `
     <h3>${name}</h3>
     <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
@@ -91,7 +122,11 @@ function showBubbleDetails(name) {
     }
   });
 
-  centerBubble.style.display = "flex";
+  overlay.style.display = "flex";
+  setTimeout(() => {
+    overlay.classList.add("active");
+    currentCenterBubbleName = name;
+  }, 10);
 }
 
 // --- Sauvegarde ---
@@ -108,15 +143,13 @@ function saveList(name) {
   })
   .then(() => {
     alert("✅ Liste sauvegardée !");
-    document.getElementById("center-bubble").style.display = "none";
   })
   .catch(error => {
-    console.error("Erreur :", error);
     alert("❌ " + error.message);
   });
 }
 
-// --- Auth state ---
+// --- État auth ---
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -125,5 +158,3 @@ firebase.auth().onAuthStateChanged(user => {
     loadBubbles();
   }
 });
-
-
