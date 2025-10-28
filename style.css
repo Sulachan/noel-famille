@@ -73,7 +73,6 @@ body::before {
   z-index: 10;
 }
 
-/* Bulles */
 .bulle {
   position: absolute;
   width: 100px;
@@ -85,7 +84,8 @@ body::before {
   cursor: pointer;
   background: transparent;
   transition: transform 0.3s ease;
-  z-index: 10;
+  z-index: 20; /* ← doit être > que #snowflakes (2) et body::before (1) */
+  pointer-events: auto; /* ← important */
 }
 
 .bulle img {
@@ -206,3 +206,4 @@ body::before {
     transform: translateY(105vh) rotate(360deg);
   }
 }
+
