@@ -40,11 +40,11 @@ function logout() {
 function loadBubbles() {
   // 🔸 Remplace ces URL par les tiennes depuis Imgur !
   const photos = {
-    "Maman": "https://imgur.com/88Fx119",
-    "Papa": "https://imgur.com/lEa3Dky",
-    "Anton": "https://imgur.com/a/XTeskdH",
-    "Ewan": "https://imgur.com/VzvtbSu",
-    "Sara": "https://imgur.com/rwnpdOV"
+    "Maman": "https://i.imgur.com/88Fx119.jpeg",
+    "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
+    "Anton": "https://i.imgur.com/3SN6pX7.jpeg",
+    "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
+    "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
   };
 
   const container = document.getElementById("bubbles");
@@ -137,3 +137,4 @@ firebase.auth().onAuthStateChanged(user => {
     currentUser = null;
   }
 });
+
