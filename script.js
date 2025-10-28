@@ -1,75 +1,95 @@
 let currentUser = null;
-let bubbles = [];
 
 // --- Authentification ---
 function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  auth.signInWithEmailAndPassword(email, password)
-    .then(() => {})
+  if (!email || !password) {
+    document.getElementById("login-message").innerText = "Remplis tous les champs.";
+    return;
+  }
+  firebase.auth().signInWithEmailAndPassword(email, password)
     .catch(error => {
-      document.getElementById("login-message").innerText = error.message;
+      console.error("Erreur login:", error);
+      document.getElementById("login-message").innerText = "Erreur : " + error.message;
     });
 }
 
 function createAccount() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(() => {})
+  if (!email || !password || password.length < 6) {
+    document.getElementById("login-message").innerText = "Mot de passe : min. 6 caractères.";
+    return;
+  }
+  firebase.auth().createUserWithEmailAndPassword(email, password)
     .catch(error => {
-      document.getElementById("login-message").innerText = error.message;
+      console.error("Erreur création:", error);
+      document.getElementById("login-message").innerText = "Erreur : " + error.message;
     });
 }
 
 function logout() {
-  auth.signOut().then(() => {
+  firebase.auth().signOut().then(() => {
     document.getElementById("app").style.display = "none";
     document.getElementById("login-screen").style.display = "block";
   });
 }
 
-// --- Chargement des bulles ---
+// --- Chargement des bulles avec photos ---
 function loadBubbles() {
-  const members = [
-    "Maman", "Papa", "Anton", "Ewan", "Sara"
-    // 👆 MODIFIE cette liste avec les prénoms de ta famille
-  ];
+  // 🔸 Remplace ces URL par les tiennes depuis Imgur !
+  const photos = {
+    "Maman": "https://imgur.com/88Fx119",
+    "Papa": "https://imgur.com/lEa3Dky",
+    "Anton": "https://imgur.com/a/XTeskdH",
+    "Ewan": "https://imgur.com/VzvtbSu",
+    "Sara": "https://imgur.com/rwnpdOV"
+  };
 
   const container = document.getElementById("bubbles");
   const radius = 200;
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
-  bubbles = [];
   container.innerHTML = "";
 
-  members.forEach((name, i) => {
-    const angle = (i / members.length) * Math.PI * 2;
+  Object.entries(photos).forEach(([name, url], i) => {
+    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
 
     const bubble = document.createElement("div");
     bubble.className = "bulle";
-    bubble.textContent = name;
+    
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = name;
+    img.style.width = "80%";
+    img.style.height = "80%";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "50%";
+
+    bubble.appendChild(img);
+    bubble.addEventListener("click", () => showBubbleDetails(name));
     bubble.style.left = (x - 50) + "px";
     bubble.style.top = (y - 50) + "px";
 
-    bubble.addEventListener("click", () => showBubbleDetails(name));
     container.appendChild(bubble);
-    bubbles.push({ name, element: bubble });
   });
 }
 
-// --- Afficher bulle au centre ---
+// --- Afficher la bulle au centre avec la liste ---
 function showBubbleDetails(name) {
-  if (!currentUser) return;
-
   const centerBubble = document.getElementById("center-bubble");
-  centerBubble.innerHTML = `<h3>${name}</h3><textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea><button onclick="saveList('${name}')">Sauvegarder</button>`;
+  centerBubble.innerHTML = `
+    <h3>${name}</h3>
+    <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
+    <button onclick="saveList('${name}')">Sauvegarder</button>
+  `;
 
-  // Charger la liste depuis Firebase
-  db.collection("listes").doc(name).get().then(doc => {
+  // Charger la liste existante depuis Firestore
+  firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
@@ -78,19 +98,36 @@ function showBubbleDetails(name) {
   centerBubble.style.display = "flex";
 }
 
+// --- Sauvegarder la liste ---
 function saveList(name) {
-  const text = document.getElementById("list-input").value;
-  db.collection("listes").doc(name).set({
+  const textarea = document.getElementById("list-input");
+  if (!textarea) {
+    console.error("Champ de texte introuvable");
+    return;
+  }
+
+  const text = textarea.value.trim();
+  if (text === "") {
+    alert("La liste ne peut pas être vide.");
+    return;
+  }
+
+  firebase.firestore().collection("listes").doc(name).set({
     text: text,
-    owner: name // On simplifie : pas d’authentification stricte pour l’instant
-  }).then(() => {
-    alert("Liste sauvegardée !");
+    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(() => {
+    alert("✅ Liste sauvegardée !");
     document.getElementById("center-bubble").style.display = "none";
+  })
+  .catch(error => {
+    console.error("Erreur sauvegarde :", error);
+    alert("❌ Erreur : " + error.message);
   });
 }
 
 // --- Écouter l’état de l’authentification ---
-auth.onAuthStateChanged(user => {
+firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
     document.getElementById("login-screen").style.display = "none";
