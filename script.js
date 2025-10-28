@@ -1,7 +1,6 @@
 let currentUser = null;
-let currentCenterBubbleName = null;
 
-// --- Authentification ---
+// --- Auth ---
 function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -32,8 +31,6 @@ function logout() {
   firebase.auth().signOut().then(() => {
     document.getElementById("app").style.display = "none";
     document.getElementById("login-screen").style.display = "block";
-    document.getElementById("center-overlay").style.display = "none";
-    currentCenterBubbleName = null;
   });
 }
 
@@ -54,104 +51,111 @@ function loadBubbles() {
 
   container.innerHTML = "";
 
-Object.entries(photos).forEach(([name, url], i) => {
-  const angle = (i / Object.keys(photos).length) * Math.PI * 2;
-  const x = centerX + radius * Math.cos(angle);
-  const y = centerY + radius * Math.sin(angle);
+  Object.entries(photos).forEach(([name, url], i) => {
+    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
 
-  const bubble = document.createElement("div");
-  bubble.className = "bulle";
-  bubble.innerHTML = `<img src="${url}" alt="${name}" loading="lazy">`;
-  
-  // Ajouter le listener APRÈS l'insertion dans le DOM
-  bubble.addEventListener("click", (e) => {
-    e.stopPropagation();
-    e.preventDefault();
-    console.log("Clic détecté sur :", name); // pour tester
-    showBubbleDetails(name);
+    const bubble = document.createElement("div");
+    bubble.className = "bulle fallback"; // fallback par défaut
+    bubble.textContent = name;
+
+    const img = new Image();
+    img.src = url;
+    img.alt = name;
+    img.style.display = "none";
+
+    img.onload = () => {
+      bubble.innerHTML = "";
+      bubble.appendChild(img);
+      img.style.display = "block";
+      bubble.classList.remove("fallback");
+    };
+
+    img.onerror = () => {
+      console.warn("Échec du chargement :", url);
+      // garde le fallback (texte + fond doré)
+    };
+
+    bubble.addEventListener("click", (e) => {
+      e.stopPropagation();
+      showCenterBubble(name, url);
+    });
+
+    bubble.style.left = (x - 50) + "px";
+    bubble.style.top = (y - 50) + "px";
+    container.appendChild(bubble);
   });
-
-  bubble.style.left = (x - 50) + "px";
-  bubble.style.top = (y - 50) + "px";
-
-  container.appendChild(bubble);
-});
 }
 
-// --- Gestion bulle centrale ---
-function closeCenterBubble(event) {
-  if (event.target.closest("#center-bubble")) return;
-  hideCenterBubble();
-}
+// --- Bulle centrale simple (overlay) ---
+function showCenterBubble(name, url) {
+  let overlay = document.getElementById("center-overlay");
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.id = "center-overlay";
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 25;
+    `;
+    document.body.appendChild(overlay);
 
-function hideCenterBubble() {
-  const overlay = document.getElementById("center-overlay");
-  if (overlay.classList.contains("active")) {
-    overlay.classList.remove("active");
-    setTimeout(() => {
-      overlay.style.display = "none";
-      currentCenterBubbleName = null;
-    }, 500);
+    overlay.addEventListener("click", () => {
+      document.body.removeChild(overlay);
+    });
   }
-}
 
-function showBubbleDetails(name) {
-  if (currentCenterBubbleName === name) return;
-
-  const overlay = document.getElementById("center-overlay");
-
-  if (currentCenterBubbleName) {
-    overlay.classList.remove("active");
-    setTimeout(() => openNewBubble(name), 500);
-  } else {
-    openNewBubble(name);
-  }
-}
-
-function openNewBubble(name) {
-  const overlay = document.getElementById("center-overlay");
-  const centerBubble = document.getElementById("center-bubble");
-
-  centerBubble.innerHTML = `
+  const content = document.createElement("div");
+  content.style.cssText = `
+    width: 300px;
+    height: 300px;
+    background: #48dbfb;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  `;
+  content.innerHTML = `
     <h3>${name}</h3>
-    <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
+    <textarea id="list-input" placeholder="Écris ta liste..." 
+      style="width:90%;height:120px;margin:10px 0;padding:10px;border:none;border-radius:8px;"></textarea>
     <button onclick="saveList('${name}')">Sauvegarder</button>
   `;
+  overlay.appendChild(content);
+  content.addEventListener("click", (e) => e.stopPropagation());
 
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
   });
-
-  overlay.style.display = "flex";
-  setTimeout(() => {
-    overlay.classList.add("active");
-    currentCenterBubbleName = name;
-  }, 10);
 }
 
 // --- Sauvegarde ---
 function saveList(name) {
   const textarea = document.getElementById("list-input");
-  if (!textarea || !textarea.value.trim()) {
+  if (!textarea?.value.trim()) {
     alert("La liste ne peut pas être vide.");
     return;
   }
-
   firebase.firestore().collection("listes").doc(name).set({
     text: textarea.value.trim(),
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(() => {
-    alert("✅ Liste sauvegardée !");
-  })
-  .catch(error => {
-    alert("❌ " + error.message);
-  });
+  }).then(() => {
+    alert("✅ Sauvegardé !");
+    document.getElementById("center-overlay")?.remove();
+  }).catch(err => alert("❌ " + err.message));
 }
 
-// --- État auth ---
+// --- Auth state ---
 firebase.auth().onAuthStateChanged(user => {
   if (user) {
     currentUser = user;
@@ -160,4 +164,3 @@ firebase.auth().onAuthStateChanged(user => {
     loadBubbles();
   }
 });
-
