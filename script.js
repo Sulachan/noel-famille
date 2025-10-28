@@ -40,11 +40,11 @@ function logout() {
 function loadBubbles() {
   // 🔸 À METTRE À JOUR AVEC TES VRAIS LIENS D'IMAGE (i.imgur.com/... .jpg)
   const photos = {
-    "Maman": "https://i.imgur.com/88Fx119.jpg",
-    "Papa": "https://i.imgur.com/lEa3Dky.jpg",
-    "Anton": "https://i.imgur.com/3SN6pX7.jpg",
-    "Ewan": "https://i.imgur.com/VzvtbSu.jpg",
-    "Sara": "https://i.imgur.com/rwnpdOV.jpg"
+    "Maman": "https://i.imgur.com/88Fx119.jpeg",
+    "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
+    "Anton": "https://i.imgur.com/3SN6pX7.jpeg",
+    "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
+    "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
   };
 
   const container = document.getElementById("bubbles");
@@ -125,3 +125,4 @@ firebase.auth().onAuthStateChanged(user => {
     loadBubbles();
   }
 });
+
