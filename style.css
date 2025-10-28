@@ -88,6 +88,18 @@ body::before {
   pointer-events: auto; /* ← important */
 }
 
+/* Bulle animée – part du cercle, va au centre */
+.bulle.animated {
+  position: fixed !important;
+  z-index: 30 !important;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), 
+              box-shadow 0.4s ease;
+}
+
+.bulle.animated img {
+  border: 3px solid gold;
+  box-shadow: 0 8px 25px rgba(255, 215, 0, 0.6);
+}
 .bulle img {
   width: 92px;
   height: 92px;
@@ -206,4 +218,5 @@ body::before {
     transform: translateY(105vh) rotate(360deg);
   }
 }
+
 
