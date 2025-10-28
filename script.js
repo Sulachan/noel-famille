@@ -54,26 +54,28 @@ function loadBubbles() {
 
   container.innerHTML = "";
 
-  Object.entries(photos).forEach(([name, url], i) => {
-    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
+Object.entries(photos).forEach(([name, url], i) => {
+  const angle = (i / Object.keys(photos).length) * Math.PI * 2;
+  const x = centerX + radius * Math.cos(angle);
+  const y = centerY + radius * Math.sin(angle);
 
-    const bubble = document.createElement("div");
-    bubble.className = "bulle";
-    
-    const img = document.createElement("img");
-    img.src = url;
-    img.alt = name;
-    img.loading = "lazy";
-
-    bubble.appendChild(img);
-    bubble.addEventListener("click", () => showBubbleDetails(name));
-    bubble.style.left = (x - 50) + "px";
-    bubble.style.top = (y - 50) + "px";
-
-    container.appendChild(bubble);
+  const bubble = document.createElement("div");
+  bubble.className = "bulle";
+  bubble.innerHTML = `<img src="${url}" alt="${name}" loading="lazy">`;
+  
+  // Ajouter le listener APRÈS l'insertion dans le DOM
+  bubble.addEventListener("click", (e) => {
+    e.stopPropagation();
+    e.preventDefault();
+    console.log("Clic détecté sur :", name); // pour tester
+    showBubbleDetails(name);
   });
+
+  bubble.style.left = (x - 50) + "px";
+  bubble.style.top = (y - 50) + "px";
+
+  container.appendChild(bubble);
+});
 }
 
 // --- Gestion bulle centrale ---
@@ -158,3 +160,4 @@ firebase.auth().onAuthStateChanged(user => {
     loadBubbles();
   }
 });
+
