@@ -1,3 +1,5 @@
+let currentOverlay = null;
+
 // --- Chargement des bulles ---
 function loadBubbles() {
   const photos = {
@@ -37,7 +39,6 @@ function loadBubbles() {
     };
 
     img.onerror = () => {
-      // Garde le fallback doré — essentiel car les liens ne sont pas des images
       console.warn("Image non chargée :", url);
     };
 
@@ -76,51 +77,59 @@ function startSnowflakes() {
   for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
 }
 
-// --- Bulle centrale avec animation CSS ---
-function showCenterBubble(name) {
-  closeCenterBubble();
+// --- Fermer la bulle actuelle (avec animation) ---
+function closeCurrentOverlay(callback = () => {}) {
+  if (!currentOverlay) {
+    callback();
+    return;
+  }
 
-  const overlay = document.createElement("div");
-  overlay.id = "center-overlay";
-  document.body.appendChild(overlay);
-
-  const bubble = document.createElement("div");
-  bubble.id = "center-bubble";
-  bubble.innerHTML = `
-    <h3>${name}</h3>
-    <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
-    <button onclick="saveList('${name}')">Sauvegarder</button>
-  `;
-  overlay.appendChild(bubble);
-
-  // Charger la liste existante
-  firebase.firestore().collection("listes").doc(name).get().then(doc => {
-    if (doc.exists && doc.data().text) {
-      document.getElementById("list-input").value = doc.data().text;
-    }
-  });
-
-  // Déclencher l'animation après un court délai
+  currentOverlay.classList.remove("active");
   setTimeout(() => {
-    overlay.classList.add("active");
-  }, 10);
-
-  // Fermer si clic en dehors
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay) closeCenterBubble();
-  });
+    if (currentOverlay.parentNode) {
+      currentOverlay.parentNode.removeChild(currentOverlay);
+    }
+    currentOverlay = null;
+    callback();
+  }, 400);
 }
 
-function closeCenterBubble() {
-  const overlay = document.getElementById("center-overlay");
-  if (overlay) {
-    overlay.classList.remove("active");
-    setTimeout(() => {
-      if (overlay.parentNode) {
-        overlay.parentNode.removeChild(overlay);
+// --- Ouvrir une nouvelle bulle ---
+function showCenterBubble(name) {
+  // Fermer l'actuelle, puis ouvrir la nouvelle
+  closeCurrentOverlay(() => {
+    const overlay = document.createElement("div");
+    overlay.id = "center-overlay";
+    document.body.appendChild(overlay);
+
+    const bubble = document.createElement("div");
+    bubble.id = "center-bubble";
+    bubble.innerHTML = `
+      <h3>${name}</h3>
+      <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
+      <button onclick="saveList('${name}')">Sauvegarder</button>
+    `;
+    overlay.appendChild(bubble);
+
+    // Charger la liste existante
+    firebase.firestore().collection("listes").doc(name).get().then(doc => {
+      if (doc.exists && doc.data().text) {
+        document.getElementById("list-input").value = doc.data().text;
       }
-    }, 400);
-  }
+    });
+
+    setTimeout(() => {
+      overlay.classList.add("active");
+    }, 10);
+
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) {
+        closeCurrentOverlay();
+      }
+    });
+
+    currentOverlay = overlay;
+  });
 }
 
 // --- Sauvegarde ---
@@ -137,7 +146,7 @@ function saveList(name) {
   })
   .then(() => {
     alert("✅ Liste sauvegardée !");
-    closeCenterBubble();
+    closeCurrentOverlay();
   })
   .catch(error => {
     alert("❌ Erreur : " + error.message);
