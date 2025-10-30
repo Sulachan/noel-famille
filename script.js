@@ -11,7 +11,7 @@ function loadBubbles() {
   };
 
   const container = document.getElementById("bubbles");
-  const radius = 200;
+  const radius = 220; // un peu plus grand pour 130px
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
@@ -48,8 +48,8 @@ function loadBubbles() {
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 50) + "px";  // 100px → centrage
-    bubble.style.top = (y - 50) + "px";
+    bubble.style.left = (x - 65) + "px"; // 130/2 = 65
+    bubble.style.top = (y - 65) + "px";
     container.appendChild(bubble);
   });
 
@@ -70,8 +70,10 @@ function animateBubbleToCenter(originalBubble, name) {
 
   const clone = document.createElement("div");
   clone.className = "bulle animated";
-  clone.style.setProperty("--start-x", (rect.left + window.scrollX) + "px");
-  clone.style.setProperty("--start-y", (rect.top + window.scrollY) + "px");
+  clone.style.left = (rect.left + window.scrollX) + "px";
+  clone.style.top = (rect.top + window.scrollY) + "px";
+  clone.style.width = "130px";
+  clone.style.height = "130px";
 
   const front = document.createElement("div");
   front.className = "front";
@@ -81,7 +83,7 @@ function animateBubbleToCenter(originalBubble, name) {
   back.className = "back";
   back.innerHTML = `
     <h3>${name}</h3>
-    <textarea id="list-input" placeholder="Ta liste..."></textarea>
+    <textarea id="list-input" placeholder="Ta liste de Noël..."></textarea>
     <button onclick="saveAndClose('${name}')">Sauvegarder</button>
   `;
 
@@ -146,13 +148,13 @@ function startSnowflakes() {
     el.innerHTML = flakes.charAt(Math.random() * flakes.length);
     el.style.left = Math.random() * 100 + "vw";
     el.style.opacity = Math.random() * 0.5 + 0.3;
-    el.style.fontSize = (Math.random() * 12 + 14) + "px";
-    el.style.animationDuration = (Math.random() * 5 + 5) + "s";
+    el.style.fontSize = (Math.random() * 14 + 16) + "px";
+    el.style.animationDuration = (Math.random() * 6 + 5) + "s";
     document.getElementById("snowflakes")?.appendChild(el);
     setTimeout(() => el.remove(), 10000);
   }
-  setInterval(createSnowflake, 400);
-  for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
+  setInterval(createSnowflake, 350);
+  for (let i = 0; i < 20; i++) setTimeout(createSnowflake, i * 200);
 }
 
 window.addEventListener("load", loadBubbles);
