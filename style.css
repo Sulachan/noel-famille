@@ -30,7 +30,7 @@ body::before {
   z-index: 10;
 }
 
-/* Bulles grandes, sans image */
+/* Bulle de base */
 .bulle {
   position: absolute;
   width: 200px;
@@ -42,7 +42,7 @@ body::before {
   cursor: pointer;
   z-index: 20;
   transition: transform 0.3s ease;
-  background: #FFD700; /* Or */
+  background: #FFD700; /* fallback par défaut */
   color: #222;
   font-weight: bold;
   font-size: 22px;
@@ -50,14 +50,22 @@ body::before {
   padding: 20px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.25);
   border: 4px solid white;
-  user-select: none;
+  overflow: hidden;
+}
+
+.bulle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  display: none; /* caché par défaut */
 }
 
 .bulle:hover {
   transform: translateY(-15px);
 }
 
-/* Overlay texte (simple) */
+/* Overlay texte */
 #text-overlay {
   position: fixed;
   top: 0;
