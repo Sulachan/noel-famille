@@ -20,7 +20,7 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.15);
   z-index: 1;
   pointer-events: none;
 }
@@ -30,11 +30,11 @@ body::before {
   z-index: 10;
 }
 
-/* Bulles originales – PLUS GRANDES (130px) */
+/* Bulles originales – GRANDES (180px) */
 .bulle {
   position: absolute;
-  width: 130px;
-  height: 130px;
+  width: 180px;
+  height: 180px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -45,14 +45,14 @@ body::before {
 }
 
 .bulle.fallback {
-  background: radial-gradient(circle, #FFD700, #FF8C00);
-  color: white;
+  background: #FFD700; /* Or pur, pas de dégradé */
+  color: #222;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 20px;
   text-align: center;
-  padding: 12px;
-  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-  border: 2px solid #FFA500;
+  padding: 20px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  border: 3px solid white;
 }
 
 .bulle img {
@@ -60,22 +60,22 @@ body::before {
   height: 100%;
   object-fit: cover;
   border-radius: 50%;
-  border: 2px solid gold;
+  border: 3px solid white;
   display: block;
 }
 
 .bulle:hover {
-  transform: translateY(-12px);
+  transform: translateY(-15px);
 }
 
-/* Bulle animée – part de la vraie position */
+/* Bulle animée */
 .bulle.animated {
   position: fixed !important;
   z-index: 30 !important;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  width: 130px !important;
-  height: 130px !important;
+  width: 180px !important;
+  height: 180px !important;
 }
 
 .bulle.animated .front,
@@ -88,71 +88,70 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 16px;
+  padding: 20px;
   box-sizing: border-box;
 }
 
 .bulle.animated .front {
-  background: radial-gradient(circle, #FFD700, #FF8C00);
-  color: white;
+  background: #FFD700;
+  color: #222;
   font-weight: bold;
-  font-size: 16px;
-  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
-  border: 2px solid #FFA500;
+  font-size: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.25);
+  border: 3px solid white;
 }
 
 .bulle.animated .back {
-  background: linear-gradient(135deg, #48dbfb, #38a1f0);
-  color: white;
+  background: #e6f7ff;
+  color: #222;
   transform: rotateY(180deg);
 }
 
 .bulle.animated.flipped {
-  transform: translate(-50%, -50%) scale(2.5) rotateY(180deg) !important;
+  transform: translate(-50%, -50%) scale(2.2) rotateY(180deg) !important;
   left: 50% !important;
   top: 50% !important;
 }
 
-/* Contenu arrière – bien contenu */
+/* Contenu arrière */
 .back h3 {
-  font-size: 20px;
-  margin-bottom: 12px;
+  font-size: 22px;
+  margin-bottom: 14px;
   text-align: center;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  font-weight: bold;
 }
 
 .back textarea {
   width: 94%;
-  height: 100px;
-  padding: 10px;
-  border: none;
-  border-radius: 8px;
-  background: rgba(255,255,255,0.92);
+  height: 110px;
+  padding: 12px;
+  border: 2px solid #48dbfb;
+  border-radius: 10px;
+  background: white;
   resize: none;
-  font-size: 15px;
+  font-size: 16px;
   font-family: inherit;
   box-sizing: border-box;
 }
 
 .back button {
-  margin-top: 12px;
-  padding: 8px 16px;
-  background: white;
-  color: #38a1f0;
+  margin-top: 14px;
+  padding: 10px 20px;
+  background: #48dbfb;
+  color: white;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 13px; /* ← plus petit */
+  font-size: 14px;
   width: 85%;
-  max-width: 170px; /* ← jamais trop large */
+  max-width: 180px;
   box-sizing: border-box;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-  transition: background 0.2s;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 
 .back button:hover {
-  background: #f0f8ff;
+  background: #38c0e0;
 }
 
 /* Flocons */
@@ -169,10 +168,10 @@ body::before {
 .snowflake {
   position: absolute;
   color: #fff;
-  font-size: 22px;
+  font-size: 24px;
   top: -30px;
   user-select: none;
-  opacity: 0.85;
+  opacity: 0.9;
   animation: fall linear forwards;
 }
 
