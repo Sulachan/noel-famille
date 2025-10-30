@@ -30,7 +30,7 @@ body::before {
   z-index: 10;
 }
 
-/* Bulles originales – taille corrigée */
+/* Bulles originales – 100px de diamètre */
 .bulle {
   position: absolute;
   width: 100px;
@@ -67,52 +67,86 @@ body::before {
   transform: translateY(-10px);
 }
 
-/* Bulle animée – pivot comme un livre */
+/* Bulle animée – pivot */
 .bulle.animated {
   position: fixed !important;
   z-index: 30 !important;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  width: 100px !important;
+  height: 100px !important;
+  left: var(--start-x) !important;
+  top: var(--start-y) !important;
 }
 
-/* Face avant : photo ou fallback */
-.bulle.animated .front {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  backface-visibility: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: bold;
-  font-size: 14px;
-  padding: 10px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Face arrière : zone de texte */
+.bulle.animated .front,
 .bulle.animated .back {
-  position: absolute;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #48dbfb;
   backface-visibility: hidden;
-  transform: rotateY(180deg);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 15px;
+  padding: 12px;
   box-sizing: border-box;
+}
+
+.bulle.animated .front {
   color: white;
+  font-weight: bold;
+  font-size: 14px;
+  background: radial-gradient(circle, #FFD700, #FFA500);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+.bulle.animated .back {
+  background: #48dbfb;
+  color: white;
+  transform: rotateY(180deg);
 }
 
 .bulle.animated.flipped {
-  transform: translate(-50%, -50%) scale(2.8) rotateY(180deg);
+  transform: translate(-50%, -50%) scale(2.8) rotateY(180deg) !important;
   left: 50% !important;
   top: 50% !important;
+  width: 100px !important;
+  height: 100px !important;
+}
+
+/* Contenu de la face arrière */
+.back h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.back textarea {
+  width: 92%;
+  height: 90px;
+  padding: 8px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.95);
+  resize: none;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.back button {
+  margin-top: 8px;
+  padding: 6px 14px;
+  background: white;
+  color: #48dbfb;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  width: 80%;
+  max-width: 160px; /* Empêche de dépasser */
+  box-sizing: border-box;
 }
 
 /* Flocons */
