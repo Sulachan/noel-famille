@@ -1,55 +1,33 @@
 let currentAnimatedBubble = null;
-let pendingBubbleClick = null;
+let pendingClick = null;
 
 function loadBubbles() {
-  const photos = {
-    "Maman": "https://i.imgur.com/88Fx119.jpeg",
-    "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
-    "Anton": "https://i.imgur.com/qU270du.jpeg",
-    "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
-    "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
-  };
+  const names = ["Maman", "Papa", "Anton", "Ewan", "Sara"]; // pas besoin d'images
 
   const container = document.getElementById("bubbles");
-  const radius = 260; // adapté à 180px
+  const radius = 320; // grand cercle
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
   container.innerHTML = "";
 
-  Object.entries(photos).forEach(([name, url], i) => {
-    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
+  names.forEach((name, i) => {
+    const angle = (i / names.length) * Math.PI * 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
 
     const bubble = document.createElement("div");
-    bubble.className = "bulle fallback";
-    bubble.dataset.name = name;
+    bubble.className = "bulle";
     bubble.textContent = name;
-
-    const img = new Image();
-    img.src = url;
-    img.alt = name;
-    img.style.display = "none";
-
-    img.onload = () => {
-      bubble.innerHTML = "";
-      bubble.appendChild(img);
-      img.style.display = "block";
-      bubble.classList.remove("fallback");
-    };
-
-    img.onerror = () => {
-      // Garde le fallback or pur (pas d'orange)
-    };
+    bubble.dataset.name = name;
 
     bubble.addEventListener("click", (e) => {
       e.stopPropagation();
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 90) + "px"; // 180/2 = 90
-    bubble.style.top = (y - 90) + "px";
+    bubble.style.left = (x - 100) + "px"; // 200/2 = 100
+    bubble.style.top = (y - 100) + "px";
     container.appendChild(bubble);
   });
 
@@ -58,71 +36,90 @@ function loadBubbles() {
 
 function handleBubbleClick(bubble, name) {
   if (currentAnimatedBubble) {
-    pendingBubbleClick = { bubble, name };
-    closeCurrentBubble();
+    pendingClick = { bubble, name };
+    closeCurrent();
     return;
   }
-  animateBubbleToCenter(bubble, name);
+  animateToCenter(bubble, name);
 }
 
-function animateBubbleToCenter(originalBubble, name) {
+function animateToCenter(originalBubble, name) {
   const rect = originalBubble.getBoundingClientRect();
-
-  const clone = document.createElement("div");
+  const clone = originalBubble.cloneNode(true);
   clone.className = "bulle animated";
   clone.style.left = (rect.left + window.scrollX) + "px";
   clone.style.top = (rect.top + window.scrollY) + "px";
-  clone.style.width = "180px";
-  clone.style.height = "180px";
+  clone.style.width = "200px";
+  clone.style.height = "200px";
 
-  const front = document.createElement("div");
-  front.className = "front";
-  front.innerHTML = originalBubble.innerHTML || name;
-
-  const back = document.createElement("div");
-  back.className = "back";
-  back.innerHTML = `
-    <h3>${name}</h3>
-    <textarea id="list-input" placeholder="Ta liste de Noël..."></textarea>
-    <button onclick="saveAndClose('${name}')">Sauvegarder</button>
-  `;
-
-  clone.appendChild(front);
-  clone.appendChild(back);
   document.body.appendChild(clone);
 
-  void clone.offsetWidth;
-  clone.classList.add("flipped");
+  // Animer vers le centre et agrandir
+  setTimeout(() => {
+    clone.style.left = "50%";
+    clone.style.top = "50%";
+    clone.style.transform = "translate(-50%, -50%) scale(1.8)";
+    clone.style.zIndex = "30";
+  }, 10);
 
   currentAnimatedBubble = { element: clone, name };
+  showTextOverlay(name);
 }
 
-function closeCurrentBubble() {
+function showTextOverlay(name) {
+  const overlay = document.createElement("div");
+  overlay.id = "text-overlay";
+  overlay.innerHTML = `
+    <div id="text-content">
+      <h2>${name}</h2>
+      <textarea id="list-input" placeholder="Ta liste de Noël..."></textarea>
+      <button onclick="saveList('${name}')">Sauvegarder</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Charger la liste existante
+  firebase.firestore().collection("listes").doc(name).get().then(doc => {
+    if (doc.exists && doc.data().text) {
+      document.getElementById("list-input").value = doc.data().text;
+    }
+  });
+
+  setTimeout(() => overlay.classList.add("active"), 50);
+}
+
+function closeCurrent() {
   if (!currentAnimatedBubble) return;
 
   const { element: clone } = currentAnimatedBubble;
-  clone.classList.remove("flipped");
+  clone.style.transform = "";
+  clone.style.left = clone.style.getPropertyValue("--start-x") || clone.style.left;
+  clone.style.top = clone.style.getPropertyValue("--start-y") || clone.style.top;
+
+  const overlay = document.getElementById("text-overlay");
+  if (overlay) overlay.classList.remove("active");
 
   setTimeout(() => {
     clone.remove();
+    if (overlay) overlay.remove();
     currentAnimatedBubble = null;
 
-    if (pendingBubbleClick) {
-      const { bubble, name } = pendingBubbleClick;
-      pendingBubbleClick = null;
-      animateBubbleToCenter(bubble, name);
+    if (pendingClick) {
+      const { bubble, name } = pendingClick;
+      pendingClick = null;
+      animateToCenter(bubble, name);
     }
-  }, 800);
+  }, 600);
 }
 
 document.addEventListener("click", (e) => {
-  if (currentAnimatedBubble && !e.target.closest(".bulle.animated")) {
-    pendingBubbleClick = null;
-    closeCurrentBubble();
+  if (currentAnimatedBubble && !e.target.closest("#text-content")) {
+    pendingClick = null;
+    closeCurrent();
   }
 });
 
-window.saveAndClose = function(name) {
+window.saveList = function(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea?.value.trim()) {
     alert("La liste ne peut pas être vide.");
@@ -134,7 +131,7 @@ window.saveAndClose = function(name) {
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
     alert("✅ Sauvegardé !");
-    closeCurrentBubble();
+    closeCurrent();
   }).catch(err => alert("❌ " + err.message));
 };
 
@@ -148,13 +145,13 @@ function startSnowflakes() {
     el.innerHTML = flakes.charAt(Math.random() * flakes.length);
     el.style.left = Math.random() * 100 + "vw";
     el.style.opacity = Math.random() * 0.6 + 0.3;
-    el.style.fontSize = (Math.random() * 16 + 18) + "px";
-    el.style.animationDuration = (Math.random() * 7 + 6) + "s";
+    el.style.fontSize = (Math.random() * 18 + 20) + "px";
+    el.style.animationDuration = (Math.random() * 8 + 6) + "s";
     document.getElementById("snowflakes")?.appendChild(el);
     setTimeout(() => el.remove(), 12000);
   }
-  setInterval(createSnowflake, 300);
-  for (let i = 0; i < 25; i++) setTimeout(createSnowflake, i * 150);
+  setInterval(createSnowflake, 250);
+  for (let i = 0; i < 30; i++) setTimeout(createSnowflake, i * 100);
 }
 
 window.addEventListener("load", loadBubbles);
