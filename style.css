@@ -1,188 +1,162 @@
-let currentAnimatedBubble = null;
-let pendingBubbleClick = null;
-
-// --- Chargement des bulles ---
-function loadBubbles() {
-  const photos = {
-    "Maman": "https://i.imgur.com/88Fx119.jpeg",
-    "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
-    "Anton": "https://i.imgur.com/qU270du.jpeg",
-    "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
-    "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
-  };
-
-  const container = document.getElementById("bubbles");
-  const radius = 200;
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-
-  container.innerHTML = "";
-
-  Object.entries(photos).forEach(([name, url], i) => {
-    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
-
-    const bubble = document.createElement("div");
-    bubble.className = "bulle fallback";
-    bubble.dataset.name = name;
-    bubble.textContent = name;
-
-    const img = new Image();
-    img.src = url;
-    img.alt = name;
-    img.style.display = "none";
-
-    img.onload = () => {
-      bubble.innerHTML = "";
-      bubble.appendChild(img);
-      img.style.display = "block";
-      bubble.classList.remove("fallback");
-    };
-
-    img.onerror = () => {
-      console.warn("Image non chargée :", url);
-    };
-
-    bubble.addEventListener("click", (e) => {
-      e.stopPropagation();
-      handleBubbleClick(bubble, name);
-    });
-
-    bubble.style.left = (x - 50) + "px";
-    bubble.style.top = (y - 50) + "px";
-    container.appendChild(bubble);
-  });
-
-  startSnowflakes();
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-// --- Gestion du clic sur une bulle ---
-function handleBubbleClick(bubble, name) {
-  if (currentAnimatedBubble) {
-    // Une bulle est déjà animée → planifier la prochaine
-    pendingBubbleClick = { bubble, name };
-    return;
+body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden;
+  background: url('https://i.imgur.com/Zsp98RG.jpeg') center/cover fixed;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.25);
+  z-index: 1;
+  pointer-events: none;
+}
+
+#app {
+  position: relative;
+  z-index: 10;
+}
+
+/* Bulles originales */
+.bulle {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 20;
+  transition: transform 0.3s ease;
+}
+
+.bulle.fallback {
+  background: radial-gradient(circle, #FFD700, #FFA500);
+  color: white;
+  font-weight: bold;
+  font-size: 14px;
+  text-align: center;
+  padding: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.bulle img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid gold;
+  display: block;
+}
+
+.bulle:hover {
+  transform: translateY(-10px);
+}
+
+/* Bulle animée (copie temporaire) */
+.bulle.animated {
+  position: fixed !important;
+  z-index: 30 !important;
+  pointer-events: none;
+  transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+/* Overlay pour le texte */
+#bubble-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 31;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#bubble-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+#bubble-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+
+#bubble-content h3 {
+  margin-bottom: 12px;
+  color: #333;
+  text-align: center;
+}
+
+#bubble-content textarea {
+  width: 100%;
+  height: 120px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  resize: none;
+  font-size: 16px;
+}
+
+#bubble-content button {
+  margin-top: 12px;
+  padding: 10px 20px;
+  background: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+}
+
+/* Flocons */
+#snowflakes {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.snowflake {
+  position: absolute;
+  color: #fff;
+  font-size: 20px;
+  top: -30px;
+  user-select: none;
+  opacity: 0.85;
+  animation: fall linear forwards;
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(105vh) rotate(360deg);
   }
-
-  animateBubbleToCenter(bubble, name);
 }
-
-// --- Animer la bulle vers le centre ---
-function animateBubbleToCenter(originalBubble, name) {
-  const rect = originalBubble.getBoundingClientRect();
-  const clone = originalBubble.cloneNode(true);
-  clone.classList.add("animated");
-  clone.style.left = rect.left + "px";
-  clone.style.top = rect.top + "px";
-  clone.style.width = rect.width + "px";
-  clone.style.height = rect.height + "px";
-
-  document.body.appendChild(clone);
-
-  // Forcer repaint
-  void clone.offsetWidth;
-
-  // Animer vers le centre
-  const finalSize = 280;
-  const scaleX = finalSize / rect.width;
-  const scaleY = finalSize / rect.height;
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-  const translateX = centerX - (rect.left + rect.width / 2);
-  const translateY = centerY - (rect.top + rect.height / 2);
-
-  clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-
-  // Afficher l'overlay de texte après l'animation
-  setTimeout(() => {
-    showTextOverlay(name, () => {
-      // Fermer → retourner la bulle
-      clone.style.transform = "";
-      setTimeout(() => {
-        clone.remove();
-        currentAnimatedBubble = null;
-
-        // Enchaîner la prochaine si planifiée
-        if (pendingBubbleClick) {
-          const { bubble, name } = pendingBubbleClick;
-          pendingBubbleClick = null;
-          animateBubbleToCenter(bubble, name);
-        }
-      }, 600);
-    });
-  }, 600);
-
-  currentAnimatedBubble = clone;
-}
-
-// --- Afficher l'overlay de texte ---
-function showTextOverlay(name, onClose) {
-  const overlay = document.createElement("div");
-  overlay.id = "bubble-overlay";
-  overlay.innerHTML = `
-    <div id="bubble-content">
-      <h3>${name}</h3>
-      <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
-      <button id="save-btn">Sauvegarder</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
-
-  // Charger la liste
-  firebase.firestore().collection("listes").doc(name).get().then(doc => {
-    if (doc.exists && doc.data().text) {
-      document.getElementById("list-input").value = doc.data().text;
-    }
-  });
-
-  // Clic en dehors ou sur Sauvegarder
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay || e.target.id === "save-btn") {
-      const textarea = document.getElementById("list-input");
-      if (e.target.id === "save-btn") {
-        if (textarea?.value.trim()) {
-          firebase.firestore().collection("listes").doc(name).set({
-            text: textarea.value.trim(),
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            alert("✅ Sauvegardé !");
-          }).catch(err => alert("❌ " + err.message));
-        } else {
-          alert("La liste ne peut pas être vide.");
-          return;
-        }
-      }
-      overlay.classList.remove("active");
-      setTimeout(() => {
-        overlay.remove();
-        onClose();
-      }, 300);
-    }
-  });
-
-  setTimeout(() => overlay.classList.add("active"), 10);
-}
-
-// --- Flocons (inchangé) ---
-function startSnowflakes() {
-  if (window.snowflakesStarted) return;
-  window.snowflakesStarted = true;
-  function createSnowflake() {
-    const flakes = "❄❅❆";
-    const el = document.createElement("div");
-    el.className = "snowflake";
-    el.innerHTML = flakes.charAt(Math.random() * flakes.length);
-    el.style.left = Math.random() * 100 + "vw";
-    el.style.opacity = Math.random() * 0.5 + 0.3;
-    el.style.fontSize = (Math.random() * 12 + 14) + "px";
-    el.style.animationDuration = (Math.random() * 5 + 5) + "s";
-    document.getElementById("snowflakes")?.appendChild(el);
-    setTimeout(() => el.remove(), 10000);
-  }
-  setInterval(createSnowflake, 400);
-  for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
-}
-
-// --- Lancer ---
-window.addEventListener("load", loadBubbles);
