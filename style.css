@@ -13,7 +13,6 @@ body {
   background: url('https://i.imgur.com/Zsp98RG.jpeg') center/cover fixed;
 }
 
-/* Voile sombre pour lisibilité */
 body::before {
   content: "";
   position: fixed;
@@ -26,50 +25,8 @@ body::before {
   pointer-events: none;
 }
 
-/* Écran de connexion */
-#login-screen {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  text-align: center;
-  z-index: 10;
-}
-
-#login-screen input {
-  display: block;
-  width: 250px;
-  padding: 10px;
-  margin: 10px 0;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-#login-screen button {
-  margin: 5px;
-  padding: 8px 15px;
-  background: #4CAF50;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-/* Bouton déconnexion */
-#logout-btn {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 8px 15px;
-  border-radius: 5px;
-  cursor: pointer;
+#app {
+  position: relative;
   z-index: 10;
 }
 
@@ -87,7 +44,6 @@ body::before {
   transition: transform 0.3s ease;
 }
 
-/* Fallback si image non chargée */
 .bulle.fallback {
   background: radial-gradient(circle, #FFD700, #FFA500);
   color: white;
@@ -111,7 +67,7 @@ body::before {
   transform: translateY(-10px);
 }
 
-/* Overlay central */
+/* Overlay central animé */
 #center-overlay {
   position: fixed;
   top: 0;
@@ -144,6 +100,14 @@ body::before {
   justify-content: center;
   color: white;
   box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  transform: scale(0.8);
+  opacity: 0;
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+}
+
+#center-overlay.active #center-bubble {
+  transform: scale(1);
+  opacity: 1;
 }
 
 #center-bubble h3 {
