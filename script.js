@@ -1,11 +1,11 @@
-let currentAnimatedBubble = null;
-let pendingClick = null;
+let currentOverlay = null;
 
 function loadBubbles() {
-  const names = ["Maman", "Papa", "Anton", "Ewan", "Sara"]; // pas besoin d'images
+  // Plus d'images → que des prénoms
+  const names = ["Maman", "Papa", "Anton", "Ewan", "Sara"];
 
   const container = document.getElementById("bubbles");
-  const radius = 320; // grand cercle
+  const radius = 300; // grand cercle
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
@@ -23,50 +23,22 @@ function loadBubbles() {
 
     bubble.addEventListener("click", (e) => {
       e.stopPropagation();
-      handleBubbleClick(bubble, name);
+      openBubble(name);
     });
 
+    // Position correcte en cercle
     bubble.style.left = (x - 100) + "px"; // 200/2 = 100
     bubble.style.top = (y - 100) + "px";
+
     container.appendChild(bubble);
   });
 
   startSnowflakes();
 }
 
-function handleBubbleClick(bubble, name) {
-  if (currentAnimatedBubble) {
-    pendingClick = { bubble, name };
-    closeCurrent();
-    return;
-  }
-  animateToCenter(bubble, name);
-}
+function openBubble(name) {
+  closeBubble();
 
-function animateToCenter(originalBubble, name) {
-  const rect = originalBubble.getBoundingClientRect();
-  const clone = originalBubble.cloneNode(true);
-  clone.className = "bulle animated";
-  clone.style.left = (rect.left + window.scrollX) + "px";
-  clone.style.top = (rect.top + window.scrollY) + "px";
-  clone.style.width = "200px";
-  clone.style.height = "200px";
-
-  document.body.appendChild(clone);
-
-  // Animer vers le centre et agrandir
-  setTimeout(() => {
-    clone.style.left = "50%";
-    clone.style.top = "50%";
-    clone.style.transform = "translate(-50%, -50%) scale(1.8)";
-    clone.style.zIndex = "30";
-  }, 10);
-
-  currentAnimatedBubble = { element: clone, name };
-  showTextOverlay(name);
-}
-
-function showTextOverlay(name) {
   const overlay = document.createElement("div");
   overlay.id = "text-overlay";
   overlay.innerHTML = `
@@ -85,40 +57,31 @@ function showTextOverlay(name) {
     }
   });
 
-  setTimeout(() => overlay.classList.add("active"), 50);
+  setTimeout(() => overlay.classList.add("active"), 10);
+
+  currentOverlay = overlay;
 }
 
-function closeCurrent() {
-  if (!currentAnimatedBubble) return;
-
-  const { element: clone } = currentAnimatedBubble;
-  clone.style.transform = "";
-  clone.style.left = clone.style.getPropertyValue("--start-x") || clone.style.left;
-  clone.style.top = clone.style.getPropertyValue("--start-y") || clone.style.top;
-
-  const overlay = document.getElementById("text-overlay");
-  if (overlay) overlay.classList.remove("active");
-
-  setTimeout(() => {
-    clone.remove();
-    if (overlay) overlay.remove();
-    currentAnimatedBubble = null;
-
-    if (pendingClick) {
-      const { bubble, name } = pendingClick;
-      pendingClick = null;
-      animateToCenter(bubble, name);
-    }
-  }, 600);
+function closeBubble() {
+  if (currentOverlay) {
+    currentOverlay.classList.remove("active");
+    setTimeout(() => {
+      if (currentOverlay.parentNode) {
+        currentOverlay.parentNode.removeChild(currentOverlay);
+      }
+    }, 300);
+    currentOverlay = null;
+  }
 }
 
+// Clic en dehors → fermer
 document.addEventListener("click", (e) => {
-  if (currentAnimatedBubble && !e.target.closest("#text-content")) {
-    pendingClick = null;
-    closeCurrent();
+  if (currentOverlay && !e.target.closest("#text-content")) {
+    closeBubble();
   }
 });
 
+// Sauvegarde
 window.saveList = function(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea?.value.trim()) {
@@ -131,10 +94,11 @@ window.saveList = function(name) {
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
     alert("✅ Sauvegardé !");
-    closeCurrent();
+    closeBubble();
   }).catch(err => alert("❌ " + err.message));
 };
 
+// Flocons
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -154,4 +118,5 @@ function startSnowflakes() {
   for (let i = 0; i < 30; i++) setTimeout(createSnowflake, i * 100);
 }
 
+// Lancer
 window.addEventListener("load", loadBubbles);
