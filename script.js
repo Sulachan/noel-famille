@@ -36,8 +36,8 @@ function loadBubbles() {
       bubble.classList.remove("fallback");
     };
 
-    // Si l'image échoue (ce qui sera le cas), garde le fallback
     img.onerror = () => {
+      // Garde le fallback doré — essentiel car les liens ne sont pas des images
       console.warn("Image non chargée :", url);
     };
 
@@ -54,7 +54,7 @@ function loadBubbles() {
   startSnowflakes();
 }
 
-// --- Flocons de neige ---
+// --- Flocons ---
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -76,7 +76,7 @@ function startSnowflakes() {
   for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
 }
 
-// --- Bulle centrale ---
+// --- Bulle centrale avec animation CSS ---
 function showCenterBubble(name) {
   closeCenterBubble();
 
@@ -93,14 +93,19 @@ function showCenterBubble(name) {
   `;
   overlay.appendChild(bubble);
 
-  // Charger la liste existante depuis Firestore
+  // Charger la liste existante
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
   });
 
-  setTimeout(() => overlay.classList.add("active"), 10);
+  // Déclencher l'animation après un court délai
+  setTimeout(() => {
+    overlay.classList.add("active");
+  }, 10);
+
+  // Fermer si clic en dehors
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeCenterBubble();
   });
@@ -110,11 +115,15 @@ function closeCenterBubble() {
   const overlay = document.getElementById("center-overlay");
   if (overlay) {
     overlay.classList.remove("active");
-    setTimeout(() => overlay.remove(), 300);
+    setTimeout(() => {
+      if (overlay.parentNode) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    }, 400);
   }
 }
 
-// --- Sauvegarde dans Firestore (publique) ---
+// --- Sauvegarde ---
 function saveList(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea || !textarea.value.trim()) {
