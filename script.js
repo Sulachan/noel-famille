@@ -1,44 +1,93 @@
-let currentOverlay = null;
+let currentAnimatedBubble = null;
+let pendingClick = null;
+
+const photos = {
+  "Maman": "https://i.imgur.com/88Fx119.jpeg",
+  "Papa": "https://i.imgur.com/lEa3Dky.jpeg",
+  "Anton": "https://i.imgur.com/qU270du.jpeg",
+  "Ewan": "https://i.imgur.com/VzvtbSu.jpeg",
+  "Sara": "https://i.imgur.com/rwnpdOV.jpeg"
+};
 
 function loadBubbles() {
-  // Plus d'images → que des prénoms
-  const names = ["Maman", "Papa", "Anton", "Ewan", "Sara"];
-
   const container = document.getElementById("bubbles");
-  const radius = 300; // grand cercle
+  const radius = 300;
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
   container.innerHTML = "";
 
-  names.forEach((name, i) => {
-    const angle = (i / names.length) * Math.PI * 2;
+  Object.keys(photos).forEach((name, i) => {
+    const angle = (i / Object.keys(photos).length) * Math.PI * 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
 
     const bubble = document.createElement("div");
     bubble.className = "bulle";
-    bubble.textContent = name;
-    bubble.dataset.name = name;
+    bubble.textContent = name; // fallback texte
 
+    const img = new Image();
+    img.src = photos[name];
+    img.alt = name;
+    img.style.display = "none";
+
+    img.onload = () => {
+      // Si l'image charge, on l'affiche à la place du texte
+      bubble.innerHTML = "";
+      bubble.appendChild(img);
+      img.style.display = "block";
+    };
+
+    // Même si elle échoue (ce qui sera le cas), le fallback reste
     bubble.addEventListener("click", (e) => {
       e.stopPropagation();
-      openBubble(name);
+      handleBubbleClick(bubble, name);
     });
 
-    // Position correcte en cercle
-    bubble.style.left = (x - 100) + "px"; // 200/2 = 100
+    bubble.style.left = (x - 100) + "px";
     bubble.style.top = (y - 100) + "px";
-
     container.appendChild(bubble);
   });
 
   startSnowflakes();
 }
 
-function openBubble(name) {
-  closeBubble();
+function handleBubbleClick(bubble, name) {
+  if (currentAnimatedBubble) {
+    pendingClick = { bubble, name };
+    closeCurrentBubble();
+    return;
+  }
+  animateToCenter(bubble, name);
+}
 
+function animateToCenter(originalBubble, name) {
+  const rect = originalBubble.getBoundingClientRect();
+  const clone = originalBubble.cloneNode(true);
+  clone.style.position = "fixed";
+  clone.style.left = (rect.left + window.scrollX) + "px";
+  clone.style.top = (rect.top + window.scrollY) + "px";
+  clone.style.width = "200px";
+  clone.style.height = "200px";
+  clone.style.zIndex = "30";
+  clone.style.margin = "0";
+  clone.style.transform = "none";
+
+  document.body.appendChild(clone);
+
+  // Animer vers le centre
+  setTimeout(() => {
+    clone.style.transition = "left 0.6s, top 0.6s, transform 0.6s";
+    clone.style.left = "50%";
+    clone.style.top = "50%";
+    clone.style.transform = "translate(-50%, -50%) scale(1.6)";
+  }, 10);
+
+  currentAnimatedBubble = { element: clone, originalBubble, name };
+  showTextOverlay(name);
+}
+
+function showTextOverlay(name) {
   const overlay = document.createElement("div");
   overlay.id = "text-overlay";
   overlay.innerHTML = `
@@ -50,38 +99,49 @@ function openBubble(name) {
   `;
   document.body.appendChild(overlay);
 
-  // Charger la liste existante
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
   });
 
-  setTimeout(() => overlay.classList.add("active"), 10);
-
-  currentOverlay = overlay;
+  setTimeout(() => overlay.classList.add("active"), 50);
 }
 
-function closeBubble() {
-  if (currentOverlay) {
-    currentOverlay.classList.remove("active");
-    setTimeout(() => {
-      if (currentOverlay.parentNode) {
-        currentOverlay.parentNode.removeChild(currentOverlay);
-      }
-    }, 300);
-    currentOverlay = null;
-  }
+function closeCurrentBubble() {
+  if (!currentAnimatedBubble) return;
+
+  const { element: clone, originalBubble } = currentAnimatedBubble;
+  const rect = originalBubble.getBoundingClientRect();
+
+  clone.style.transition = "left 0.6s, top 0.6s, transform 0.6s";
+  clone.style.left = (rect.left + window.scrollX) + "px";
+  clone.style.top = (rect.top + window.scrollY) + "px";
+  clone.style.transform = "none";
+
+  const overlay = document.getElementById("text-overlay");
+  if (overlay) overlay.classList.remove("active");
+
+  setTimeout(() => {
+    clone.remove();
+    if (overlay) overlay.remove();
+    currentAnimatedBubble = null;
+
+    if (pendingClick) {
+      const { bubble, name } = pendingClick;
+      pendingClick = null;
+      animateToCenter(bubble, name);
+    }
+  }, 600);
 }
 
-// Clic en dehors → fermer
 document.addEventListener("click", (e) => {
-  if (currentOverlay && !e.target.closest("#text-content")) {
-    closeBubble();
+  if (currentAnimatedBubble && !e.target.closest("#text-content")) {
+    pendingClick = null;
+    closeCurrentBubble();
   }
 });
 
-// Sauvegarde
 window.saveList = function(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea?.value.trim()) {
@@ -94,11 +154,10 @@ window.saveList = function(name) {
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
     alert("✅ Sauvegardé !");
-    closeBubble();
+    closeCurrentBubble();
   }).catch(err => alert("❌ " + err.message));
 };
 
-// Flocons
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -118,5 +177,4 @@ function startSnowflakes() {
   for (let i = 0; i < 30; i++) setTimeout(createSnowflake, i * 100);
 }
 
-// Lancer
 window.addEventListener("load", loadBubbles);
