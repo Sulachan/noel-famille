@@ -1,7 +1,6 @@
 let currentAnimatedBubble = null;
 let pendingBubbleClick = null;
 
-// --- Chargement des bulles ---
 function loadBubbles() {
   const photos = {
     "Maman": "https://i.imgur.com/88Fx119.jpeg",
@@ -49,7 +48,7 @@ function loadBubbles() {
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 50) + "px";
+    bubble.style.left = (x - 50) + "px";  // 100px de large → -50 pour centrer
     bubble.style.top = (y - 50) + "px";
     container.appendChild(bubble);
   });
@@ -57,114 +56,101 @@ function loadBubbles() {
   startSnowflakes();
 }
 
-// --- Gestion du clic sur une bulle ---
 function handleBubbleClick(bubble, name) {
   if (currentAnimatedBubble) {
-    // Une bulle est déjà animée → planifier la prochaine
     pendingBubbleClick = { bubble, name };
+    closeCurrentBubble();
     return;
   }
-
   animateBubbleToCenter(bubble, name);
 }
 
-// --- Animer la bulle vers le centre ---
 function animateBubbleToCenter(originalBubble, name) {
   const rect = originalBubble.getBoundingClientRect();
-  const clone = originalBubble.cloneNode(true);
-  clone.classList.add("animated");
-  clone.style.left = rect.left + "px";
-  clone.style.top = rect.top + "px";
-  clone.style.width = rect.width + "px";
-  clone.style.height = rect.height + "px";
+  const clone = document.createElement("div");
+  clone.className = "bulle animated";
+
+  // Créer les deux faces
+  const front = document.createElement("div");
+  front.className = "front";
+  front.innerHTML = originalBubble.innerHTML || name;
+
+  const back = document.createElement("div");
+  back.className = "back";
+  back.innerHTML = `
+    <h3 style="font-size:18px;margin-bottom:8px;">${name}</h3>
+    <textarea id="list-input" placeholder="Ta liste..." 
+      style="width:90%;height:90px;padding:8px;border:none;border-radius:6px;background:rgba(255,255,255,0.9);resize:none;"></textarea>
+    <button onclick="saveAndClose('${name}')" 
+      style="margin-top:8px;padding:6px 12px;background:white;color:#48dbfb;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">
+      Sauvegarder
+    </button>
+  `;
+
+  clone.appendChild(front);
+  clone.appendChild(back);
+
+  // Position initiale
+  clone.style.left = (rect.left + window.scrollX) + "px";
+  clone.style.top = (rect.top + window.scrollY) + "px";
+  clone.style.width = "100px";
+  clone.style.height = "100px";
 
   document.body.appendChild(clone);
 
   // Forcer repaint
   void clone.offsetWidth;
 
-  // Animer vers le centre
-  const finalSize = 280;
-  const scaleX = finalSize / rect.width;
-  const scaleY = finalSize / rect.height;
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
-  const translateX = centerX - (rect.left + rect.width / 2);
-  const translateY = centerY - (rect.top + rect.height / 2);
+  // Animer vers le centre ET pivoter
+  clone.classList.add("flipped");
 
-  clone.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+  currentAnimatedBubble = { element: clone, name };
+}
 
-  // Afficher l'overlay de texte après l'animation
+function closeCurrentBubble() {
+  if (!currentAnimatedBubble) return;
+
+  const { element: clone } = currentAnimatedBubble;
+  clone.classList.remove("flipped");
+
   setTimeout(() => {
-    showTextOverlay(name, () => {
-      // Fermer → retourner la bulle
-      clone.style.transform = "";
-      setTimeout(() => {
-        clone.remove();
-        currentAnimatedBubble = null;
+    clone.remove();
+    currentAnimatedBubble = null;
 
-        // Enchaîner la prochaine si planifiée
-        if (pendingBubbleClick) {
-          const { bubble, name } = pendingBubbleClick;
-          pendingBubbleClick = null;
-          animateBubbleToCenter(bubble, name);
-        }
-      }, 600);
-    });
-  }, 600);
-
-  currentAnimatedBubble = clone;
+    if (pendingBubbleClick) {
+      const { bubble, name } = pendingBubbleClick;
+      pendingBubbleClick = null;
+      animateBubbleToCenter(bubble, name);
+    }
+  }, 800);
 }
 
-// --- Afficher l'overlay de texte ---
-function showTextOverlay(name, onClose) {
-  const overlay = document.createElement("div");
-  overlay.id = "bubble-overlay";
-  overlay.innerHTML = `
-    <div id="bubble-content">
-      <h3>${name}</h3>
-      <textarea id="list-input" placeholder="Écris ta liste de Noël..."></textarea>
-      <button id="save-btn">Sauvegarder</button>
-    </div>
-  `;
-  document.body.appendChild(overlay);
+// Clic en dehors → fermer
+document.addEventListener("click", (e) => {
+  if (currentAnimatedBubble && !e.target.closest(".bulle.animated")) {
+    pendingBubbleClick = null;
+    closeCurrentBubble();
+  }
+});
 
-  // Charger la liste
-  firebase.firestore().collection("listes").doc(name).get().then(doc => {
-    if (doc.exists && doc.data().text) {
-      document.getElementById("list-input").value = doc.data().text;
-    }
-  });
+// Sauvegarde + fermeture
+window.saveAndClose = function(name) {
+  const textarea = document.getElementById("list-input");
+  if (!textarea?.value.trim()) {
+    alert("La liste ne peut pas être vide.");
+    return;
+  }
 
-  // Clic en dehors ou sur Sauvegarder
-  overlay.addEventListener("click", (e) => {
-    if (e.target === overlay || e.target.id === "save-btn") {
-      const textarea = document.getElementById("list-input");
-      if (e.target.id === "save-btn") {
-        if (textarea?.value.trim()) {
-          firebase.firestore().collection("listes").doc(name).set({
-            text: textarea.value.trim(),
-            lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
-          }).then(() => {
-            alert("✅ Sauvegardé !");
-          }).catch(err => alert("❌ " + err.message));
-        } else {
-          alert("La liste ne peut pas être vide.");
-          return;
-        }
-      }
-      overlay.classList.remove("active");
-      setTimeout(() => {
-        overlay.remove();
-        onClose();
-      }, 300);
-    }
-  });
+  firebase.firestore().collection("listes").doc(name).set({
+    text: textarea.value.trim(),
+    lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
+  }).then(() => {
+    alert("✅ Sauvegardé !");
+    closeCurrentBubble();
+  }).catch(err => alert("❌ " + err.message));
+};
 
-  setTimeout(() => overlay.classList.add("active"), 10);
-}
-
-// --- Flocons (inchangé) ---
+// Flocons
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -184,5 +170,5 @@ function startSnowflakes() {
   for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
 }
 
-// --- Lancer ---
+// Lancer
 window.addEventListener("load", loadBubbles);
