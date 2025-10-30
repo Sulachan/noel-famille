@@ -11,7 +11,7 @@ const photos = {
 
 function loadBubbles() {
   const container = document.getElementById("bubbles");
-  const radius = 300;
+  const radius = 340;
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
@@ -24,28 +24,19 @@ function loadBubbles() {
 
     const bubble = document.createElement("div");
     bubble.className = "bulle";
-    bubble.textContent = name; // fallback texte
 
-    const img = new Image();
+    const img = document.createElement("img");
     img.src = photos[name];
     img.alt = name;
-    img.style.display = "none";
 
-    img.onload = () => {
-      // Si l'image charge, on l'affiche à la place du texte
-      bubble.innerHTML = "";
-      bubble.appendChild(img);
-      img.style.display = "block";
-    };
-
-    // Même si elle échoue (ce qui sera le cas), le fallback reste
+    bubble.appendChild(img);
     bubble.addEventListener("click", (e) => {
       e.stopPropagation();
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 100) + "px";
-    bubble.style.top = (y - 100) + "px";
+    bubble.style.left = (x - 110) + "px";
+    bubble.style.top = (y - 110) + "px";
     container.appendChild(bubble);
   });
 
@@ -67,15 +58,15 @@ function animateToCenter(originalBubble, name) {
   clone.style.position = "fixed";
   clone.style.left = (rect.left + window.scrollX) + "px";
   clone.style.top = (rect.top + window.scrollY) + "px";
-  clone.style.width = "200px";
-  clone.style.height = "200px";
+  clone.style.width = "220px";
+  clone.style.height = "220px";
   clone.style.zIndex = "30";
   clone.style.margin = "0";
   clone.style.transform = "none";
+  clone.style.transition = "none";
 
   document.body.appendChild(clone);
 
-  // Animer vers le centre
   setTimeout(() => {
     clone.style.transition = "left 0.6s, top 0.6s, transform 0.6s";
     clone.style.left = "50%";
@@ -168,13 +159,13 @@ function startSnowflakes() {
     el.innerHTML = flakes.charAt(Math.random() * flakes.length);
     el.style.left = Math.random() * 100 + "vw";
     el.style.opacity = Math.random() * 0.6 + 0.3;
-    el.style.fontSize = (Math.random() * 18 + 20) + "px";
-    el.style.animationDuration = (Math.random() * 8 + 6) + "s";
+    el.style.fontSize = (Math.random() * 20 + 22) + "px";
+    el.style.animationDuration = (Math.random() * 8 + 7) + "s";
     document.getElementById("snowflakes")?.appendChild(el);
     setTimeout(() => el.remove(), 12000);
   }
-  setInterval(createSnowflake, 250);
-  for (let i = 0; i < 30; i++) setTimeout(createSnowflake, i * 100);
+  setInterval(createSnowflake, 200);
+  for (let i = 0; i < 35; i++) setTimeout(createSnowflake, i * 80);
 }
 
 window.addEventListener("load", loadBubbles);
