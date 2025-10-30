@@ -48,7 +48,7 @@ function loadBubbles() {
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 50) + "px";  // 100px de large → -50 pour centrer
+    bubble.style.left = (x - 50) + "px";  // 100px → centrage
     bubble.style.top = (y - 50) + "px";
     container.appendChild(bubble);
   });
@@ -67,10 +67,12 @@ function handleBubbleClick(bubble, name) {
 
 function animateBubbleToCenter(originalBubble, name) {
   const rect = originalBubble.getBoundingClientRect();
+
   const clone = document.createElement("div");
   clone.className = "bulle animated";
+  clone.style.setProperty("--start-x", (rect.left + window.scrollX) + "px");
+  clone.style.setProperty("--start-y", (rect.top + window.scrollY) + "px");
 
-  // Créer les deux faces
   const front = document.createElement("div");
   front.className = "front";
   front.innerHTML = originalBubble.innerHTML || name;
@@ -78,30 +80,16 @@ function animateBubbleToCenter(originalBubble, name) {
   const back = document.createElement("div");
   back.className = "back";
   back.innerHTML = `
-    <h3 style="font-size:18px;margin-bottom:8px;">${name}</h3>
-    <textarea id="list-input" placeholder="Ta liste..." 
-      style="width:90%;height:90px;padding:8px;border:none;border-radius:6px;background:rgba(255,255,255,0.9);resize:none;"></textarea>
-    <button onclick="saveAndClose('${name}')" 
-      style="margin-top:8px;padding:6px 12px;background:white;color:#48dbfb;border:none;border-radius:5px;cursor:pointer;font-weight:bold;">
-      Sauvegarder
-    </button>
+    <h3>${name}</h3>
+    <textarea id="list-input" placeholder="Ta liste..."></textarea>
+    <button onclick="saveAndClose('${name}')">Sauvegarder</button>
   `;
 
   clone.appendChild(front);
   clone.appendChild(back);
-
-  // Position initiale
-  clone.style.left = (rect.left + window.scrollX) + "px";
-  clone.style.top = (rect.top + window.scrollY) + "px";
-  clone.style.width = "100px";
-  clone.style.height = "100px";
-
   document.body.appendChild(clone);
 
-  // Forcer repaint
   void clone.offsetWidth;
-
-  // Animer vers le centre ET pivoter
   clone.classList.add("flipped");
 
   currentAnimatedBubble = { element: clone, name };
@@ -125,7 +113,6 @@ function closeCurrentBubble() {
   }, 800);
 }
 
-// Clic en dehors → fermer
 document.addEventListener("click", (e) => {
   if (currentAnimatedBubble && !e.target.closest(".bulle.animated")) {
     pendingBubbleClick = null;
@@ -133,7 +120,6 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// Sauvegarde + fermeture
 window.saveAndClose = function(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea?.value.trim()) {
@@ -150,7 +136,6 @@ window.saveAndClose = function(name) {
   }).catch(err => alert("❌ " + err.message));
 };
 
-// Flocons
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -170,5 +155,4 @@ function startSnowflakes() {
   for (let i = 0; i < 15; i++) setTimeout(createSnowflake, i * 300);
 }
 
-// Lancer
 window.addEventListener("load", loadBubbles);
