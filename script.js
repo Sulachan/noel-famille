@@ -1,40 +1,3 @@
-let currentUser = null;
-
-// --- Authentification ---
-function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  if (!email || !password) {
-    document.getElementById("login-message").innerText = "Remplis tous les champs.";
-    return;
-  }
-  firebase.auth().signInWithEmailAndPassword(email, password)
-    .catch(error => {
-      document.getElementById("login-message").innerText = "Erreur : " + error.message;
-    });
-}
-
-function createAccount() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  if (!email || !password || password.length < 6) {
-    document.getElementById("login-message").innerText = "Mot de passe : min. 6 caractères.";
-    return;
-  }
-  firebase.auth().createUserWithEmailAndPassword(email, password)
-    .catch(error => {
-      document.getElementById("login-message").innerText = "Erreur : " + error.message;
-    });
-}
-
-function logout() {
-  firebase.auth().signOut().then(() => {
-    document.getElementById("app").style.display = "none";
-    document.getElementById("login-screen").style.display = "block";
-    closeCenterBubble();
-  });
-}
-
 // --- Chargement des bulles ---
 function loadBubbles() {
   const photos = {
@@ -73,7 +36,7 @@ function loadBubbles() {
       bubble.classList.remove("fallback");
     };
 
-    // En cas d'erreur (comme avec tes liens), garde le fallback
+    // Si l'image échoue (ce qui sera le cas), garde le fallback
     img.onerror = () => {
       console.warn("Image non chargée :", url);
     };
@@ -88,11 +51,10 @@ function loadBubbles() {
     container.appendChild(bubble);
   });
 
-  // Lancer les flocons après le chargement initial
   startSnowflakes();
 }
 
-// --- Flocons ---
+// --- Flocons de neige ---
 function startSnowflakes() {
   if (window.snowflakesStarted) return;
   window.snowflakesStarted = true;
@@ -116,7 +78,7 @@ function startSnowflakes() {
 
 // --- Bulle centrale ---
 function showCenterBubble(name) {
-  closeCenterBubble(); // Fermer l'existante
+  closeCenterBubble();
 
   const overlay = document.createElement("div");
   overlay.id = "center-overlay";
@@ -131,17 +93,14 @@ function showCenterBubble(name) {
   `;
   overlay.appendChild(bubble);
 
-  // Charger la liste existante
+  // Charger la liste existante depuis Firestore
   firebase.firestore().collection("listes").doc(name).get().then(doc => {
     if (doc.exists && doc.data().text) {
       document.getElementById("list-input").value = doc.data().text;
     }
   });
 
-  // Animation d'apparition
   setTimeout(() => overlay.classList.add("active"), 10);
-
-  // Clic en dehors
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) closeCenterBubble();
   });
@@ -155,7 +114,7 @@ function closeCenterBubble() {
   }
 }
 
-// --- Sauvegarde ---
+// --- Sauvegarde dans Firestore (publique) ---
 function saveList(name) {
   const textarea = document.getElementById("list-input");
   if (!textarea || !textarea.value.trim()) {
@@ -172,16 +131,9 @@ function saveList(name) {
     closeCenterBubble();
   })
   .catch(error => {
-    alert("❌ " + error.message);
+    alert("❌ Erreur : " + error.message);
   });
 }
 
-// --- État d'authentification ---
-firebase.auth().onAuthStateChanged(user => {
-  if (user) {
-    currentUser = user;
-    document.getElementById("login-screen").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    loadBubbles();
-  }
-});
+// --- Lancer à l'ouverture ---
+window.addEventListener("load", loadBubbles);
