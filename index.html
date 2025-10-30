@@ -8,28 +8,14 @@
 </head>
 <body>
 
-  <!-- Écran de connexion -->
-  <div id="login-screen">
-    <h2>Connexion</h2>
-    <input type="email" id="email" placeholder="ton@email.com" />
-    <input type="password" id="password" placeholder="mot de passe" />
-    <button onclick="login()">Se connecter</button>
-    <button onclick="createAccount()">Créer un compte</button>
-    <p id="login-message"></p>
-  </div>
-
-  <!-- Application principale -->
-  <div id="app" style="display:none;">
-    <button id="logout-btn" onclick="logout()">Déconnexion</button>
+  <div id="app">
     <div id="bubbles"></div>
   </div>
 
-  <!-- Flocons de neige -->
   <div id="snowflakes"></div>
 
-  <!-- Firebase SDK -->
+  <!-- Firebase : seulement Firestore (pas d'auth) -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
 
   <script>
@@ -42,6 +28,7 @@
       appId: "1:1094358531153:web:10cdf999625a7dc8d5cc70"
     };
     firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
   </script>
 
   <script src="script.js"></script>
