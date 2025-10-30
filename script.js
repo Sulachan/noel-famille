@@ -11,7 +11,7 @@ function loadBubbles() {
   };
 
   const container = document.getElementById("bubbles");
-  const radius = 220; // un peu plus grand pour 130px
+  const radius = 260; // adapté à 180px
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
 
@@ -40,7 +40,7 @@ function loadBubbles() {
     };
 
     img.onerror = () => {
-      console.warn("Image non chargée :", url);
+      // Garde le fallback or pur (pas d'orange)
     };
 
     bubble.addEventListener("click", (e) => {
@@ -48,8 +48,8 @@ function loadBubbles() {
       handleBubbleClick(bubble, name);
     });
 
-    bubble.style.left = (x - 65) + "px"; // 130/2 = 65
-    bubble.style.top = (y - 65) + "px";
+    bubble.style.left = (x - 90) + "px"; // 180/2 = 90
+    bubble.style.top = (y - 90) + "px";
     container.appendChild(bubble);
   });
 
@@ -72,8 +72,8 @@ function animateBubbleToCenter(originalBubble, name) {
   clone.className = "bulle animated";
   clone.style.left = (rect.left + window.scrollX) + "px";
   clone.style.top = (rect.top + window.scrollY) + "px";
-  clone.style.width = "130px";
-  clone.style.height = "130px";
+  clone.style.width = "180px";
+  clone.style.height = "180px";
 
   const front = document.createElement("div");
   front.className = "front";
@@ -147,14 +147,14 @@ function startSnowflakes() {
     el.className = "snowflake";
     el.innerHTML = flakes.charAt(Math.random() * flakes.length);
     el.style.left = Math.random() * 100 + "vw";
-    el.style.opacity = Math.random() * 0.5 + 0.3;
-    el.style.fontSize = (Math.random() * 14 + 16) + "px";
-    el.style.animationDuration = (Math.random() * 6 + 5) + "s";
+    el.style.opacity = Math.random() * 0.6 + 0.3;
+    el.style.fontSize = (Math.random() * 16 + 18) + "px";
+    el.style.animationDuration = (Math.random() * 7 + 6) + "s";
     document.getElementById("snowflakes")?.appendChild(el);
-    setTimeout(() => el.remove(), 10000);
+    setTimeout(() => el.remove(), 12000);
   }
-  setInterval(createSnowflake, 350);
-  for (let i = 0; i < 20; i++) setTimeout(createSnowflake, i * 200);
+  setInterval(createSnowflake, 300);
+  for (let i = 0; i < 25; i++) setTimeout(createSnowflake, i * 150);
 }
 
 window.addEventListener("load", loadBubbles);
