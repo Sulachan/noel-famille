@@ -20,7 +20,7 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(0, 0, 0, 0.2);
   z-index: 1;
   pointer-events: none;
 }
@@ -30,11 +30,11 @@ body::before {
   z-index: 10;
 }
 
-/* Bulles originales – 100px de diamètre */
+/* Bulles originales – PLUS GRANDES (130px) */
 .bulle {
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 130px;
+  height: 130px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -45,13 +45,14 @@ body::before {
 }
 
 .bulle.fallback {
-  background: radial-gradient(circle, #FFD700, #FFA500);
+  background: radial-gradient(circle, #FFD700, #FF8C00);
   color: white;
   font-weight: bold;
-  font-size: 14px;
+  font-size: 16px;
   text-align: center;
-  padding: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  padding: 12px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.25);
+  border: 2px solid #FFA500;
 }
 
 .bulle img {
@@ -64,19 +65,17 @@ body::before {
 }
 
 .bulle:hover {
-  transform: translateY(-10px);
+  transform: translateY(-12px);
 }
 
-/* Bulle animée – pivot */
+/* Bulle animée – part de la vraie position */
 .bulle.animated {
   position: fixed !important;
   z-index: 30 !important;
   transform-style: preserve-3d;
   transition: transform 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-  width: 100px !important;
-  height: 100px !important;
-  left: var(--start-x) !important;
-  top: var(--start-y) !important;
+  width: 130px !important;
+  height: 130px !important;
 }
 
 .bulle.animated .front,
@@ -89,64 +88,71 @@ body::before {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 16px;
   box-sizing: border-box;
 }
 
 .bulle.animated .front {
+  background: radial-gradient(circle, #FFD700, #FF8C00);
   color: white;
   font-weight: bold;
-  font-size: 14px;
-  background: radial-gradient(circle, #FFD700, #FFA500);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  font-size: 16px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  border: 2px solid #FFA500;
 }
 
 .bulle.animated .back {
-  background: #48dbfb;
+  background: linear-gradient(135deg, #48dbfb, #38a1f0);
   color: white;
   transform: rotateY(180deg);
 }
 
 .bulle.animated.flipped {
-  transform: translate(-50%, -50%) scale(2.8) rotateY(180deg) !important;
+  transform: translate(-50%, -50%) scale(2.5) rotateY(180deg) !important;
   left: 50% !important;
   top: 50% !important;
-  width: 100px !important;
-  height: 100px !important;
 }
 
-/* Contenu de la face arrière */
+/* Contenu arrière – bien contenu */
 .back h3 {
-  font-size: 18px;
-  margin-bottom: 8px;
+  font-size: 20px;
+  margin-bottom: 12px;
   text-align: center;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .back textarea {
-  width: 92%;
-  height: 90px;
-  padding: 8px;
+  width: 94%;
+  height: 100px;
+  padding: 10px;
   border: none;
-  border-radius: 6px;
-  background: rgba(255,255,255,0.95);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.92);
   resize: none;
-  font-size: 14px;
+  font-size: 15px;
+  font-family: inherit;
   box-sizing: border-box;
 }
 
 .back button {
-  margin-top: 8px;
-  padding: 6px 14px;
+  margin-top: 12px;
+  padding: 8px 16px;
   background: white;
-  color: #48dbfb;
+  color: #38a1f0;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: bold;
-  font-size: 14px;
-  width: 80%;
-  max-width: 160px; /* Empêche de dépasser */
+  font-size: 13px; /* ← plus petit */
+  width: 85%;
+  max-width: 170px; /* ← jamais trop large */
   box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: background 0.2s;
+}
+
+.back button:hover {
+  background: #f0f8ff;
 }
 
 /* Flocons */
@@ -163,7 +169,7 @@ body::before {
 .snowflake {
   position: absolute;
   color: #fff;
-  font-size: 20px;
+  font-size: 22px;
   top: -30px;
   user-select: none;
   opacity: 0.85;
