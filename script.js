@@ -161,6 +161,9 @@ function showCentralBubble() {
 function closeCentralBubble(callback) {
   if (!currentMember) return;
   
+  // Appliquer l'effet de répulsion aux bulles extérieures
+  applyRepulsion();
+  
   // Supprimer la classe d'ouverture et ajouter la classe de fermeture
   centralBubble.classList.remove('open');
   
