@@ -70,6 +70,28 @@ function createCentralBubble() {
   });
 }
 
+// Effet de répulsion sur les bulles extérieures
+function applyRepulsion() {
+  const bubbles = document.querySelectorAll('.bulle');
+  
+  bubbles.forEach(bubble => {
+    // Retirer l'animation de flottement normale
+    bubble.style.animation = 'none';
+    
+    // Forcer un reflow
+    void bubble.offsetWidth;
+    
+    // Appliquer l'animation de répulsion
+    bubble.classList.add('repulsion');
+    
+    // Réactiver l'animation de flottement après la répulsion
+    setTimeout(() => {
+      bubble.classList.remove('repulsion');
+      bubble.style.animation = ''; // Rétablir l'animation normale
+    }, 500);
+  });
+}
+
 // Ouverture de la bulle centrale
 function openCentralBubble(member) {
   // Si on clique sur la même bulle, on ferme la bulle centrale
@@ -105,6 +127,9 @@ function showCentralBubble() {
   
   // Appliquer l'animation d'ouverture
   centralBubble.classList.add('open');
+  
+  // Appliquer l'effet de répulsion aux bulles extérieures
+  applyRepulsion();
 }
 
 // Fermeture de la bulle centrale
