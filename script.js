@@ -1,10 +1,10 @@
 // Configuration des membres de la famille
 const familyMembers = [
-  { id: 'person1', name: 'Personne 1', photoUrl: 'https://i.imgur.com/photo1.jpg', left: '15%', top: '20%' },
-  { id: 'person2', name: 'Personne 2', photoUrl: 'https://i.imgur.com/photo2.jpg', left: '85%', top: '20%' },
-  { id: 'person3', name: 'Personne 3', photoUrl: 'https://i.imgur.com/photo3.jpg', left: '15%', top: '80%' },
-  { id: 'person4', name: 'Personne 4', photoUrl: 'https://i.imgur.com/photo4.jpg', left: '85%', top: '80%' },
-  { id: 'person5', name: 'Personne 5', photoUrl: 'https://i.imgur.com/photo5.jpg', left: '50%', top: '50%' }
+  { id: 'person1', name: 'Personne 1', photoUrl: 'https://i.imgur.com/photo1.jpg' },
+  { id: 'person2', name: 'Personne 2', photoUrl: 'https://i.imgur.com/photo2.jpg' },
+  { id: 'person3', name: 'Personne 3', photoUrl: 'https://i.imgur.com/photo3.jpg' },
+  { id: 'person4', name: 'Personne 4', photoUrl: 'https://i.imgur.com/photo4.jpg' },
+  { id: 'person5', name: 'Personne 5', photoUrl: 'https://i.imgur.com/photo5.jpg' }
 ];
 
 // Variables globales
@@ -20,15 +20,22 @@ document.addEventListener('DOMContentLoaded', function() {
   createSnowflakes();
 });
 
-// Création des bulles des membres
+// Création des bulles des membres en cercle
 function createBubbles() {
   const bubblesContainer = document.getElementById('bubbles');
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
+  const radius = Math.min(centerX, centerY) * 0.7; // Rayon du cercle
   
-  familyMembers.forEach(member => {
+  familyMembers.forEach((member, index) => {
+    const angle = (index / familyMembers.length) * 2 * Math.PI;
+    const x = centerX + radius * Math.cos(angle) - 90; // -90 pour centrer la bulle (180px/2)
+    const y = centerY + radius * Math.sin(angle) - 90;
+    
     const bubble = document.createElement('div');
     bubble.className = 'bulle';
-    bubble.style.left = member.left;
-    bubble.style.top = member.top;
+    bubble.style.left = `${x}px`;
+    bubble.style.top = `${y}px`;
     bubble.innerHTML = `<img src="${member.photoUrl}" alt="${member.name}">`;
     bubble.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -135,9 +142,12 @@ function saveWishlist() {
     console.log('Sauvegardé!');
     // Petit feedback visuel
     const button = document.getElementById('central-bubble-save');
+    const originalText = button.textContent;
     button.textContent = '✓ Sauvegardé!';
+    button.style.background = '#2E7D32';
     setTimeout(() => {
-      button.textContent = 'Sauvegarder';
+      button.textContent = originalText;
+      button.style.background = '#4CAF50';
     }, 2000);
   }).catch(error => {
     console.error('Erreur de sauvegarde:', error);
@@ -172,3 +182,10 @@ function createSnowflakes() {
   // Recréer des flocons périodiquement
   setInterval(createSnowflakes, 10000);
 }
+
+// Redimensionnement des bulles si la fenêtre change de taille
+window.addEventListener('resize', function() {
+  const bubblesContainer = document.getElementById('bubbles');
+  bubblesContainer.innerHTML = '';
+  createBubbles();
+});
