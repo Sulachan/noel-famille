@@ -25,12 +25,13 @@ function createBubbles() {
   const centerY = window.innerHeight / 2;
   
   // Rayon pour positionner les bulles autour de la bulle centrale
-  const radius = 425;
+  // 750px (diamètre centrale) / 2 + 525px (diamètre bulle) / 2 = 637.5px
+  const radius = 637.5;
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 175; // -175 pour centrer (350px/2)
-    const y = centerY + radius * Math.sin(angle) - 175;
+    const x = centerX + radius * Math.cos(angle) - 262.5; // -262.5 pour centrer (525px/2)
+    const y = centerY + radius * Math.sin(angle) - 262.5;
     
     const bubble = document.createElement('div');
     bubble.className = 'bulle';
@@ -78,7 +79,6 @@ function openCentralBubble(member) {
   }
   
   if (currentMember) {
-    // Fermer la bulle actuelle avant d'ouvrir une nouvelle
     closeCentralBubble(() => {
       currentMember = member;
       showCentralBubble();
@@ -91,10 +91,8 @@ function openCentralBubble(member) {
 
 // Affichage de la bulle centrale
 function showCentralBubble() {
-  // Mettre à jour le contenu
   document.getElementById('central-bubble-name').textContent = currentMember.name;
   
-  // Charger les souhaits existants
   loadWishlist(currentMember.id, (text) => {
     document.getElementById('central-bubble-textarea').value = text;
   });
@@ -169,7 +167,7 @@ function saveWishlist() {
   });
 }
 
-// Création des flocons de neige (code d'origine qui fonctionnait bien)
+// Création des flocons de neige (avec tailles augmentées)
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
   const snowflakeCount = 50;
@@ -182,7 +180,7 @@ function createSnowflakes() {
       snowflake.style.left = Math.random() * 100 + 'vw';
       snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
       snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-      snowflake.style.fontSize = (Math.random() * 10 + 15) + 'px';
+      snowflake.style.fontSize = (Math.random() * 15 + 22.5) + 'px'; // 15-25px * 1.5 = 22.5-37.5px
       
       snowflakesContainer.appendChild(snowflake);
       
