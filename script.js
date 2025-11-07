@@ -18,17 +18,20 @@ document.addEventListener('DOMContentLoaded', function() {
   createSnowflakes();
 });
 
-// Création des bulles des membres en cercle
+// Création des bulles des membres en cercle, collées à la bulle centrale
 function createBubbles() {
   const bubblesContainer = document.getElementById('bubbles');
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
-  const radius = Math.min(centerX, centerY) * 0.7;
+  
+  // Rayon pour positionner les bulles autour de la bulle centrale
+  // 500px (diamètre centrale) / 2 + 350px (diamètre bulle) / 2 = 425px
+  const radius = 425;
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 110;
-    const y = centerY + radius * Math.sin(angle) - 110;
+    const x = centerX + radius * Math.cos(angle) - 175; // -175 pour centrer (350px/2)
+    const y = centerY + radius * Math.sin(angle) - 175;
     
     const bubble = document.createElement('div');
     bubble.className = 'bulle';
