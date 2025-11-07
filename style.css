@@ -180,11 +180,12 @@ body::before {
 .snowflake {
   position: absolute;
   color: #fff;
-  font-size: 26px;
-  top: -30px;
+  top: -50px;
   user-select: none;
-  opacity: 0.9;
+  opacity: 0.8;
   animation: fall linear forwards;
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+  pointer-events: none;
 }
 
 @keyframes fall {
