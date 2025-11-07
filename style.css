@@ -68,20 +68,20 @@ body::before {
   50% { transform: translateY(-15px) scale(1.02); }
 }
 
-/* Effet de répulsion quand la bulle centrale s'ouvre */
+/* Effet de répulsion corrigé */
 .bulle.repulsion {
-  animation: repulsion 0.5s ease-out forwards;
+  animation: repulsion 0.5s ease-out forwards !important;
 }
 
 @keyframes repulsion {
   0% { 
-    transform: translateY(0) scale(1);
+    transform: translate(0, 0) scale(1);
   }
   50% { 
-    transform: translateY(0) scale(1.1); /* Légère expansion */
+    transform: translate(var(--translate-x), var(--translate-y)) scale(0.95);
   }
   100% { 
-    transform: translateY(0) scale(1); /* Retour à la normale */
+    transform: translate(0, 0) scale(1);
   }
 }
 
@@ -132,11 +132,11 @@ body::before {
   }
   70% { 
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1.1); /* Grossissement */
+    transform: translate(-50%, -50%) scale(1.1);
   }
   100% { 
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1); /* Léger rétrécissement */
+    transform: translate(-50%, -50%) scale(1);
   }
 }
 
@@ -215,11 +215,12 @@ body::before {
 .snowflake {
   position: absolute;
   color: #fff;
-  font-size: 39px;
-  top: -45px;
+  font-size: 20px; /* Réduit pour améliorer les performances */
+  top: -20px;
   user-select: none;
-  opacity: 0.9;
+  opacity: 0.7;
   animation: fall linear forwards;
+  will-change: transform; /* Optimisation des performances */
 }
 
 @keyframes fall {
