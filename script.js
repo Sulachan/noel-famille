@@ -25,7 +25,6 @@ function createBubbles() {
   const centerY = window.innerHeight / 2;
   
   // Rayon pour positionner les bulles autour de la bulle centrale
-  // 500px (diamètre centrale) / 2 + 350px (diamètre bulle) / 2 = 425px
   const radius = 425;
   
   familyMembers.forEach((member, index) => {
@@ -72,7 +71,11 @@ function createCentralBubble() {
 
 // Ouverture de la bulle centrale
 function openCentralBubble(member) {
-  if (currentMember && currentMember.id === member.id) return;
+  // Si on clique sur la même bulle, on ferme la bulle centrale
+  if (currentMember && currentMember.id === member.id) {
+    closeCentralBubble();
+    return;
+  }
   
   if (currentMember) {
     closeCentralBubble(() => {
@@ -99,6 +102,8 @@ function showCentralBubble() {
 
 // Fermeture de la bulle centrale
 function closeCentralBubble(callback) {
+  if (!currentMember) return;
+  
   centralBubble.classList.remove('open');
   centralBubble.classList.add('closing');
   
@@ -148,32 +153,51 @@ function saveWishlist() {
   });
 }
 
-// Création des flocons de neige (code d'origine)
+// Création des flocons de neige optimisée
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 50;
+  const snowflakeCount = 25; // Réduit pour améliorer les performances
   
   for (let i = 0; i < snowflakeCount; i++) {
-    setTimeout(() => {
-      const snowflake = document.createElement('div');
-      snowflake.className = 'snowflake';
-      snowflake.innerHTML = '❄';
-      snowflake.style.left = Math.random() * 100 + 'vw';
-      snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-      snowflake.style.fontSize = (Math.random() * 10 + 15) + 'px';
-      
-      snowflakesContainer.appendChild(snowflake);
-      
-      // Supprimer le flocon après l'animation
-      setTimeout(() => {
-        snowflake.remove();
-      }, 10000);
-    }, i * 200);
+    createSnowflake(snowflakesContainer, i);
   }
   
   // Recréer des flocons périodiquement
-  setInterval(createSnowflakes, 10000);
+  setInterval(() => {
+    createSnowflake(snowflakesContainer, 0);
+  }, 300); // Créer un flocon toutes les 300ms
+}
+
+// Création d'un flocon individuel
+function createSnowflake(container, index) {
+  setTimeout(() => {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.innerHTML = '❄';
+    
+    // Position aléatoire
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    
+    // Taille aléatoire
+    const size = Math.random() * 15 + 15; // 15px à 30px
+    snowflake.style.fontSize = `${size}px`;
+    
+    // Durée d'animation aléatoire
+    const duration = Math.random() * 5 + 8; // 8 à 13 secondes
+    snowflake.style.animationDuration = `${duration}s`;
+    
+    // Opacité aléatoire
+    snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+    
+    container.appendChild(snowflake);
+    
+    // Supprimer le flocon après l'animation
+    setTimeout(() => {
+      if (snowflake.parentNode) {
+        snowflake.remove();
+      }
+    }, duration * 1000);
+  }, index * 200);
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
