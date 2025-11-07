@@ -42,8 +42,8 @@ body::before {
 
 .bulle {
   position: absolute;
-  width: 220px;
-  height: 220px;
+  width: 350px; /* 70% de 500px */
+  height: 350px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -54,6 +54,18 @@ body::before {
   box-shadow: 0 8px 25px rgba(0,0,0,0.3);
   border: 5px solid gold;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: float 3s ease-in-out infinite;
+}
+
+.bulle:nth-child(1) { animation-delay: 0s; }
+.bulle:nth-child(2) { animation-delay: 0.5s; }
+.bulle:nth-child(3) { animation-delay: 1s; }
+.bulle:nth-child(4) { animation-delay: 1.5s; }
+.bulle:nth-child(5) { animation-delay: 2s; }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-10px) scale(1.02); }
 }
 
 .bulle img {
@@ -64,8 +76,9 @@ body::before {
 }
 
 .bulle:hover {
-  transform: scale(1.15);
+  transform: scale(1.1);
   box-shadow: 0 15px 35px rgba(255,215,0,0.4);
+  animation-play-state: paused;
 }
 
 .central-bubble {
@@ -88,12 +101,18 @@ body::before {
   opacity: 0;
   transition: transform 0.5s ease, opacity 0.5s ease;
   box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  animation: centralFloat 3s ease-in-out infinite;
+}
+
+@keyframes centralFloat {
+  0%, 100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-50%, calc(-50% - 5px)) scale(1.02); }
 }
 
 .central-bubble.open {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
-  animation: bounce 0.5s ease;
+  animation: bounce 0.5s ease, centralFloat 3s ease-in-out infinite 0.5s;
 }
 
 @keyframes bounce {
@@ -105,6 +124,7 @@ body::before {
 .central-bubble.closing {
   opacity: 0;
   transform: translate(-50%, -50%) scale(0);
+  animation: none;
 }
 
 .central-bubble-content {
