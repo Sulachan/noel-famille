@@ -169,25 +169,33 @@ body::before {
 }
 
 .central-bubble-content h2 {
-  margin-bottom: 30px;
+  margin-bottom: 20px; /* Réduit pour faire plus de place au texte */
   color: #333;
   font-size: 42px;
 }
 
 .central-bubble-content textarea {
-  width: 90%;
-  height: 60%;
-  margin: 30px 0;
-  padding: 30px;
+  width: 95%; /* Légèrement plus large */
+  height: 65%; /* Plus de hauteur pour le texte */
+  margin: 15px 0; /* Marge réduite */
+  padding: 25px; /* Padding ajusté */
   border: 3px solid #ddd;
-  border-radius: 23px;
+  border-radius: 20px;
   resize: none;
   font-family: inherit;
-  font-size: 27px;
+  font-size: 36px; /* Augmenté de 27px à 36px (+33%) */
+  font-weight: 500; /* Un peu plus gras pour mieux lire */
+  line-height: 1.4; /* Meilleur espacement entre les lignes */
+}
+
+.central-bubble-content textarea::placeholder {
+  font-size: 32px; /* Taille du texte placeholder également augmentée */
+  color: #999;
+  opacity: 0.7;
 }
 
 .central-bubble-content button {
-  padding: 23px 45px;
+  padding: 20px 40px; /* Légèrement réduit pour équilibrer */
   background: #4CAF50;
   color: white;
   border: none;
@@ -196,6 +204,7 @@ body::before {
   font-size: 27px;
   font-weight: bold;
   transition: background 0.3s ease;
+  margin-top: 10px; /* Marge réduite */
 }
 
 .central-bubble-content button:hover {
