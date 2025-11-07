@@ -23,11 +23,11 @@ function createBubbles() {
   const bubblesContainer = document.getElementById('bubbles');
   const centerX = window.innerWidth / 2;
   const centerY = window.innerHeight / 2;
-  const radius = Math.min(centerX, centerY) * 0.7; // Rayon du cercle
+  const radius = Math.min(centerX, centerY) * 0.7;
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 110; // -110 pour centrer la bulle (220px/2)
+    const x = centerX + radius * Math.cos(angle) - 110;
     const y = centerY + radius * Math.sin(angle) - 110;
     
     const bubble = document.createElement('div');
@@ -56,7 +56,6 @@ function createCentralBubble() {
   `;
   document.body.appendChild(centralBubble);
   
-  // Gestionnaire de sauvegarde
   document.getElementById('central-bubble-save').addEventListener('click', saveWishlist);
   
   // Fermer la bulle centrale en cliquant à l'extérieur
@@ -73,7 +72,6 @@ function openCentralBubble(member) {
   if (currentMember && currentMember.id === member.id) return;
   
   if (currentMember) {
-    // Fermer la bulle actuelle avant d'ouvrir une nouvelle
     closeCentralBubble(() => {
       currentMember = member;
       showCentralBubble();
@@ -86,15 +84,12 @@ function openCentralBubble(member) {
 
 // Affichage de la bulle centrale
 function showCentralBubble() {
-  // Mettre à jour le contenu
   document.getElementById('central-bubble-name').textContent = currentMember.name;
   
-  // Charger les souhaits existants
   loadWishlist(currentMember.id, (text) => {
     document.getElementById('central-bubble-textarea').value = text;
   });
   
-  // Afficher avec animation
   centralBubble.classList.remove('closing');
   centralBubble.classList.add('open');
 }
@@ -136,7 +131,6 @@ function saveWishlist() {
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
     console.log('Sauvegardé!');
-    // Petit feedback visuel
     const button = document.getElementById('central-bubble-save');
     const originalText = button.textContent;
     button.textContent = '✓ Sauvegardé!';
@@ -151,47 +145,32 @@ function saveWishlist() {
   });
 }
 
-// Création des flocons de neige optimisée
+// Création des flocons de neige (code d'origine)
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 30; // Doublé à 30 flocons
+  const snowflakeCount = 50;
   
   for (let i = 0; i < snowflakeCount; i++) {
     setTimeout(() => {
       const snowflake = document.createElement('div');
       snowflake.className = 'snowflake';
       snowflake.innerHTML = '❄';
-      
-      // Taille plus grande et variable
-      const size = Math.random() * 25 + 20; // 20px à 45px
-      snowflake.style.fontSize = `${size}px`;
-      
-      // Position horizontale
       snowflake.style.left = Math.random() * 100 + 'vw';
-      
-      // Durée d'animation plus lente
-      const duration = Math.random() * 8 + 12; // 12 à 20 secondes
-      snowflake.style.animationDuration = `${duration}s`;
-      
-      // Opacité réduite
-      snowflake.style.opacity = Math.random() * 0.4 + 0.3;
-      
-      // Délai d'animation aléatoire
-      snowflake.style.animationDelay = Math.random() * 3 + 's';
+      snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
+      snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+      snowflake.style.fontSize = (Math.random() * 10 + 15) + 'px';
       
       snowflakesContainer.appendChild(snowflake);
       
       // Supprimer le flocon après l'animation
       setTimeout(() => {
-        if (snowflake.parentNode) {
-          snowflake.remove();
-        }
-      }, duration * 1000 + 5000);
-    }, i * 300); // Espacement raisonnable
+        snowflake.remove();
+      }, 10000);
+    }, i * 200);
   }
   
   // Recréer des flocons périodiquement
-  setInterval(createSnowflakes, 12000); // Toutes les 12 secondes
+  setInterval(createSnowflakes, 10000);
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
