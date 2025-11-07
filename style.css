@@ -42,7 +42,7 @@ body::before {
 
 .bulle {
   position: absolute;
-  width: 350px; /* 70% de 500px */
+  width: 350px;
   height: 350px;
   border-radius: 50%;
   display: flex;
