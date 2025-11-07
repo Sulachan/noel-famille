@@ -1,10 +1,10 @@
 // Configuration des membres de la famille
 const familyMembers = [
-  { id: 'person1', name: 'Personne 1', photoUrl: 'https://i.imgur.com/photo1.jpg' },
-  { id: 'person2', name: 'Personne 2', photoUrl: 'https://i.imgur.com/photo2.jpg' },
-  { id: 'person3', name: 'Personne 3', photoUrl: 'https://i.imgur.com/photo3.jpg' },
-  { id: 'person4', name: 'Personne 4', photoUrl: 'https://i.imgur.com/photo4.jpg' },
-  { id: 'person5', name: 'Personne 5', photoUrl: 'https://i.imgur.com/photo5.jpg' }
+  { id: 'person1', name: 'Maman', photoUrl: 'https://i.imgur.com/88Fx119.jpeg' },
+  { id: 'person2', name: 'Papa', photoUrl: 'https://i.imgur.com/lEa3Dky.jpeg' },
+  { id: 'person3', name: 'Anton', photoUrl: 'https://i.imgur.com/3SN6pX7.jpeg' },
+  { id: 'person4', name: 'Ewan', photoUrl: 'https://i.imgur.com/VzvtbSu.jpeg' },
+  { id: 'person5', name: 'Sara', photoUrl: 'https://i.imgur.com/rwnpdOV.jpeg' }
 ];
 
 // Variables globales
@@ -314,3 +314,4 @@ window.addEventListener('resize', function() {
 
 // Démarrer la création périodique de flocons
 setInterval(createSnowflakes, 20000);
+
