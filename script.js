@@ -33,11 +33,12 @@ function createBubbles() {
   const centerY = window.innerHeight / 2;
   
   // Rayon pour positionner les bulles autour de la bulle centrale
-  const radius = 637.5;
+  // 1500px (diamètre centrale) / 2 + 525px (diamètre bulle) / 2 = 1012.5px
+  const radius = 1012.5;
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 262.5;
+    const x = centerX + radius * Math.cos(angle) - 262.5; // -262.5 pour centrer (525px/2)
     const y = centerY + radius * Math.sin(angle) - 262.5;
     
     const bubble = document.createElement('div');
