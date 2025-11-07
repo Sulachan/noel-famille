@@ -10,13 +10,11 @@ const familyMembers = [
 // Variables globales
 let currentMember = null;
 let centralBubble = null;
-let overlay = null;
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
   createBubbles();
   createCentralBubble();
-  createOverlay();
   createSnowflakes();
 });
 
@@ -29,8 +27,8 @@ function createBubbles() {
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 90; // -90 pour centrer la bulle (180px/2)
-    const y = centerY + radius * Math.sin(angle) - 90;
+    const x = centerX + radius * Math.cos(angle) - 110; // -110 pour centrer la bulle (220px/2)
+    const y = centerY + radius * Math.sin(angle) - 110;
     
     const bubble = document.createElement('div');
     bubble.className = 'bulle';
@@ -60,14 +58,14 @@ function createCentralBubble() {
   
   // Gestionnaire de sauvegarde
   document.getElementById('central-bubble-save').addEventListener('click', saveWishlist);
-}
-
-// Création de l'overlay
-function createOverlay() {
-  overlay = document.createElement('div');
-  overlay.id = 'overlay';
-  overlay.addEventListener('click', closeCentralBubble);
-  document.body.appendChild(overlay);
+  
+  // Fermer la bulle centrale en cliquant à l'extérieur
+  document.addEventListener('click', (e) => {
+    if (currentMember && !centralBubble.contains(e.target) && 
+        !e.target.closest('.bulle')) {
+      closeCentralBubble();
+    }
+  });
 }
 
 // Ouverture de la bulle centrale
@@ -97,7 +95,6 @@ function showCentralBubble() {
   });
   
   // Afficher avec animation
-  overlay.classList.add('active');
   centralBubble.classList.remove('closing');
   centralBubble.classList.add('open');
 }
@@ -108,7 +105,6 @@ function closeCentralBubble(callback) {
   centralBubble.classList.add('closing');
   
   setTimeout(() => {
-    overlay.classList.remove('active');
     centralBubble.classList.remove('closing');
     currentMember = null;
     if (callback) callback();
@@ -158,7 +154,7 @@ function saveWishlist() {
 // Création des flocons de neige optimisée
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 15; // Réduit de 50 à 15 flocons
+  const snowflakeCount = 30; // Doublé à 30 flocons
   
   for (let i = 0; i < snowflakeCount; i++) {
     setTimeout(() => {
@@ -167,35 +163,35 @@ function createSnowflakes() {
       snowflake.innerHTML = '❄';
       
       // Taille plus grande et variable
-      const size = Math.random() * 30 + 25; // 25px à 55px
+      const size = Math.random() * 25 + 20; // 20px à 45px
       snowflake.style.fontSize = `${size}px`;
       
       // Position horizontale
       snowflake.style.left = Math.random() * 100 + 'vw';
       
       // Durée d'animation plus lente
-      const duration = Math.random() * 10 + 15; // 15 à 25 secondes
+      const duration = Math.random() * 8 + 12; // 12 à 20 secondes
       snowflake.style.animationDuration = `${duration}s`;
       
       // Opacité réduite
       snowflake.style.opacity = Math.random() * 0.4 + 0.3;
       
       // Délai d'animation aléatoire
-      snowflake.style.animationDelay = Math.random() * 5 + 's';
+      snowflake.style.animationDelay = Math.random() * 3 + 's';
       
       snowflakesContainer.appendChild(snowflake);
       
-      // Supprimer le flocon après l'animation (plus long)
+      // Supprimer le flocon après l'animation
       setTimeout(() => {
         if (snowflake.parentNode) {
           snowflake.remove();
         }
       }, duration * 1000 + 5000);
-    }, i * 500); // Espacement plus long entre la création des flocons
+    }, i * 300); // Espacement raisonnable
   }
   
-  // Recréer des flocons moins fréquemment
-  setInterval(createSnowflakes, 15000); // Toutes les 15 secondes au lieu de 10
+  // Recréer des flocons périodiquement
+  setInterval(createSnowflakes, 12000); // Toutes les 12 secondes
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
