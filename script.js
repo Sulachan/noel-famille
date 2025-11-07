@@ -155,32 +155,47 @@ function saveWishlist() {
   });
 }
 
-// Création des flocons de neige
+// Création des flocons de neige optimisée
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 50;
+  const snowflakeCount = 15; // Réduit de 50 à 15 flocons
   
   for (let i = 0; i < snowflakeCount; i++) {
     setTimeout(() => {
       const snowflake = document.createElement('div');
       snowflake.className = 'snowflake';
       snowflake.innerHTML = '❄';
+      
+      // Taille plus grande et variable
+      const size = Math.random() * 30 + 25; // 25px à 55px
+      snowflake.style.fontSize = `${size}px`;
+      
+      // Position horizontale
       snowflake.style.left = Math.random() * 100 + 'vw';
-      snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-      snowflake.style.fontSize = (Math.random() * 10 + 15) + 'px';
+      
+      // Durée d'animation plus lente
+      const duration = Math.random() * 10 + 15; // 15 à 25 secondes
+      snowflake.style.animationDuration = `${duration}s`;
+      
+      // Opacité réduite
+      snowflake.style.opacity = Math.random() * 0.4 + 0.3;
+      
+      // Délai d'animation aléatoire
+      snowflake.style.animationDelay = Math.random() * 5 + 's';
       
       snowflakesContainer.appendChild(snowflake);
       
-      // Supprimer le flocon après l'animation
+      // Supprimer le flocon après l'animation (plus long)
       setTimeout(() => {
-        snowflake.remove();
-      }, 10000);
-    }, i * 200);
+        if (snowflake.parentNode) {
+          snowflake.remove();
+        }
+      }, duration * 1000 + 5000);
+    }, i * 500); // Espacement plus long entre la création des flocons
   }
   
-  // Recréer des flocons périodiquement
-  setInterval(createSnowflakes, 10000);
+  // Recréer des flocons moins fréquemment
+  setInterval(createSnowflakes, 15000); // Toutes les 15 secondes au lieu de 10
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
