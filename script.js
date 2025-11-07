@@ -25,12 +25,11 @@ function createBubbles() {
   const centerY = window.innerHeight / 2;
   
   // Rayon pour positionner les bulles autour de la bulle centrale
-  // 750px (diamètre centrale) / 2 + 525px (diamètre bulle) / 2 = 637.5px
   const radius = 637.5;
   
   familyMembers.forEach((member, index) => {
     const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 262.5; // -262.5 pour centrer (525px/2)
+    const x = centerX + radius * Math.cos(angle) - 262.5;
     const y = centerY + radius * Math.sin(angle) - 262.5;
     
     const bubble = document.createElement('div');
@@ -42,6 +41,13 @@ function createBubbles() {
       e.stopPropagation();
       openCentralBubble(member);
     });
+    
+    // Stocker la position originale pour l'animation de répulsion
+    bubble.dataset.originalX = x;
+    bubble.dataset.originalY = y;
+    bubble.dataset.centerX = centerX;
+    bubble.dataset.centerY = centerY;
+    
     bubblesContainer.appendChild(bubble);
   });
 }
@@ -70,13 +76,31 @@ function createCentralBubble() {
   });
 }
 
-// Effet de répulsion sur les bulles extérieures
+// Effet de répulsion corrigé sur les bulles extérieures
 function applyRepulsion() {
   const bubbles = document.querySelectorAll('.bulle');
+  const centerX = window.innerWidth / 2;
+  const centerY = window.innerHeight / 2;
   
   bubbles.forEach(bubble => {
-    // Retirer l'animation de flottement normale
-    bubble.style.animation = 'none';
+    const originalX = parseFloat(bubble.dataset.originalX);
+    const originalY = parseFloat(bubble.dataset.originalY);
+    
+    // Calculer la direction de répulsion (opposée au centre)
+    const dirX = originalX - centerX;
+    const dirY = originalY - centerY;
+    const distance = Math.sqrt(dirX * dirX + dirY * dirY);
+    
+    // Normaliser la direction
+    const normX = dirX / distance;
+    const normY = dirY / distance;
+    
+    // Distance de répulsion (proportionnelle à la taille des bulles)
+    const repulsionDistance = 50;
+    
+    // Appliquer les valeurs CSS personnalisées pour l'animation
+    bubble.style.setProperty('--translate-x', `${normX * repulsionDistance}px`);
+    bubble.style.setProperty('--translate-y', `${normY * repulsionDistance}px`);
     
     // Forcer un reflow
     void bubble.offsetWidth;
@@ -84,10 +108,9 @@ function applyRepulsion() {
     // Appliquer l'animation de répulsion
     bubble.classList.add('repulsion');
     
-    // Réactiver l'animation de flottement après la répulsion
+    // Retirer l'animation après qu'elle soit terminée
     setTimeout(() => {
       bubble.classList.remove('repulsion');
-      bubble.style.animation = ''; // Rétablir l'animation normale
     }, 500);
   });
 }
@@ -129,7 +152,9 @@ function showCentralBubble() {
   centralBubble.classList.add('open');
   
   // Appliquer l'effet de répulsion aux bulles extérieures
-  applyRepulsion();
+  setTimeout(() => {
+    applyRepulsion();
+  }, 100); // Petit délai pour synchroniser avec l'ouverture
 }
 
 // Fermeture de la bulle centrale
@@ -192,34 +217,49 @@ function saveWishlist() {
   });
 }
 
-// Création des flocons de neige (avec tailles augmentées)
+// Création des flocons de neige optimisée
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 50;
+  const snowflakeCount = 15; // Réduit pour améliorer les performances
   
   for (let i = 0; i < snowflakeCount; i++) {
-    setTimeout(() => {
-      const snowflake = document.createElement('div');
-      snowflake.className = 'snowflake';
-      snowflake.innerHTML = '❄';
-      snowflake.style.left = Math.random() * 100 + 'vw';
-      snowflake.style.animationDuration = (Math.random() * 5 + 5) + 's';
-      snowflake.style.opacity = Math.random() * 0.5 + 0.3;
-      snowflake.style.fontSize = (Math.random() * 15 + 22.5) + 'px'; // 15-25px * 1.5 = 22.5-37.5px
-      
-      snowflakesContainer.appendChild(snowflake);
-      
-      // Supprimer le flocon après l'animation
-      setTimeout(() => {
-        if (snowflake.parentNode) {
-          snowflake.remove();
-        }
-      }, 10000);
-    }, i * 200);
+    createSnowflake(snowflakesContainer, i);
   }
-  
-  // Recréer des flocons périodiquement
-  setInterval(createSnowflakes, 10000);
+}
+
+// Création d'un flocon individuel
+function createSnowflake(container, index) {
+  setTimeout(() => {
+    const snowflake = document.createElement('div');
+    snowflake.className = 'snowflake';
+    snowflake.innerHTML = '❄';
+    
+    // Position aléatoire
+    snowflake.style.left = Math.random() * 100 + 'vw';
+    
+    // Taille aléatoire réduite
+    const size = Math.random() * 10 + 15; // 15px à 25px
+    snowflake.style.fontSize = `${size}px`;
+    
+    // Durée d'animation plus lente
+    const duration = Math.random() * 10 + 10; // 10 à 20 secondes
+    snowflake.style.animationDuration = `${duration}s`;
+    
+    // Opacité réduite
+    snowflake.style.opacity = Math.random() * 0.4 + 0.3;
+    
+    // Délai d'animation aléatoire
+    snowflake.style.animationDelay = Math.random() * 5 + 's';
+    
+    container.appendChild(snowflake);
+    
+    // Supprimer le flocon après l'animation
+    setTimeout(() => {
+      if (snowflake.parentNode) {
+        snowflake.remove();
+      }
+    }, duration * 1000 + 2000);
+  }, index * 500); // Espacement plus long
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
@@ -228,3 +268,6 @@ window.addEventListener('resize', function() {
   bubblesContainer.innerHTML = '';
   createBubbles();
 });
+
+// Démarrer la création périodique de flocons
+setInterval(createSnowflakes, 20000); // Toutes les 20 secondes
