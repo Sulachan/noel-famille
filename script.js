@@ -13,6 +13,14 @@ let centralBubble = null;
 
 // Initialisation
 document.addEventListener('DOMContentLoaded', function() {
+  // Vérifier que Firebase est initialisé
+  try {
+    firebase.initializeApp(firebaseConfig);
+    console.log('Firebase initialisé avec succès');
+  } catch (error) {
+    console.log('Firebase déjà initialisé ou erreur:', error);
+  }
+  
   createBubbles();
   createCentralBubble();
   createSnowflakes();
@@ -183,6 +191,15 @@ function closeCentralBubble(callback) {
 
 // Chargement de la liste de souhaits depuis Firestore
 function loadWishlist(memberId, callback) {
+  // Vérifier que Firestore est disponible
+  if (!firebase.firestore) {
+    console.error('Firestore non disponible');
+    callback('');
+    return;
+  }
+  
+  const db = firebase.firestore();
+  
   db.collection('wishlists').doc(memberId).get().then(doc => {
     if (doc.exists) {
       callback(doc.data().text || '');
@@ -197,15 +214,25 @@ function loadWishlist(memberId, callback) {
 
 // Sauvegarde de la liste de souhaits dans Firestore
 function saveWishlist() {
-  if (!currentMember) return;
+  if (!currentMember) {
+    alert('Aucun membre sélectionné');
+    return;
+  }
+  
+  // Vérifier que Firestore est disponible
+  if (!firebase.firestore) {
+    alert('Firestore non disponible. Vérifiez la configuration Firebase.');
+    return;
+  }
   
   const text = document.getElementById('central-bubble-textarea').value;
+  const db = firebase.firestore();
   
   db.collection('wishlists').doc(currentMember.id).set({
     text: text,
     lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
   }).then(() => {
-    console.log('Sauvegardé!');
+    console.log('Sauvegardé avec succès!');
     const button = document.getElementById('central-bubble-save');
     const originalText = button.textContent;
     button.textContent = '✓ Sauvegardé!';
@@ -215,15 +242,27 @@ function saveWishlist() {
       button.style.background = '#4CAF50';
     }, 2000);
   }).catch(error => {
-    console.error('Erreur de sauvegarde:', error);
-    alert('Erreur lors de la sauvegarde');
+    console.error('Erreur de sauvegarde détaillée:', error);
+    
+    // Message d'erreur plus explicite
+    let errorMessage = 'Erreur lors de la sauvegarde. ';
+    
+    if (error.code === 'permission-denied') {
+      errorMessage += 'Permissions Firebase insuffisantes. Vérifiez les règles de sécurité.';
+    } else if (error.code === 'unavailable') {
+      errorMessage += 'Connexion internet nécessaire.';
+    } else {
+      errorMessage += 'Détails: ' + error.message;
+    }
+    
+    alert(errorMessage);
   });
 }
 
 // Création des flocons de neige optimisée
 function createSnowflakes() {
   const snowflakesContainer = document.getElementById('snowflakes');
-  const snowflakeCount = 15; // Réduit pour améliorer les performances
+  const snowflakeCount = 15;
   
   for (let i = 0; i < snowflakeCount; i++) {
     createSnowflake(snowflakesContainer, i);
@@ -241,11 +280,11 @@ function createSnowflake(container, index) {
     snowflake.style.left = Math.random() * 100 + 'vw';
     
     // Taille aléatoire réduite
-    const size = Math.random() * 10 + 15; // 15px à 25px
+    const size = Math.random() * 10 + 15;
     snowflake.style.fontSize = `${size}px`;
     
     // Durée d'animation plus lente
-    const duration = Math.random() * 10 + 10; // 10 à 20 secondes
+    const duration = Math.random() * 10 + 10;
     snowflake.style.animationDuration = `${duration}s`;
     
     // Opacité réduite
@@ -262,7 +301,7 @@ function createSnowflake(container, index) {
         snowflake.remove();
       }
     }, duration * 1000 + 2000);
-  }, index * 500); // Espacement plus long
+  }, index * 500);
 }
 
 // Redimensionnement des bulles si la fenêtre change de taille
@@ -273,4 +312,4 @@ window.addEventListener('resize', function() {
 });
 
 // Démarrer la création périodique de flocons
-setInterval(createSnowflakes, 20000); // Toutes les 20 secondes
+setInterval(createSnowflakes, 20000);
