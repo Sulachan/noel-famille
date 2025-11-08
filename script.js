@@ -26,40 +26,49 @@ document.addEventListener('DOMContentLoaded', function() {
   createSnowflakes();
 });
 
-// Création des bulles des membres en cercle, collées à la bulle centrale
+// Création des bulles des membres en cercle, avec positionnement en pourcentages
 function createBubbles() {
   const bubblesContainer = document.getElementById('bubbles');
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
+  bubblesContainer.innerHTML = '';
   
-  // Rayon pour positionner les bulles autour de la bulle centrale
-  // 1500px (diamètre centrale) / 2 + 525px (diamètre bulle) / 2 = 1012.5px
-  const radius = 1012.5;
+  // Positions en pourcentages pour un placement responsive
+  const positions = [
+    { left: '15%', top: '20%' },   // Haut gauche
+    { left: '85%', top: '20%' },   // Haut droite
+    { left: '15%', top: '80%' },   // Bas gauche
+    { left: '85%', top: '80%' },   // Bas droite
+    { left: '50%', top: '50%' }    // Centre
+  ];
   
   familyMembers.forEach((member, index) => {
-    const angle = (index / familyMembers.length) * 2 * Math.PI;
-    const x = centerX + radius * Math.cos(angle) - 262.5; // -262.5 pour centrer (525px/2)
-    const y = centerY + radius * Math.sin(angle) - 262.5;
+    const position = positions[index];
     
     const bubble = document.createElement('div');
     bubble.className = 'bulle';
-    bubble.style.left = `${x}px`;
-    bubble.style.top = `${y}px`;
-    bubble.innerHTML = `<img src="${member.photoUrl}" alt="${member.name}">`;
+    bubble.style.left = position.left;
+    bubble.style.top = position.top;
+    bubble.style.transform = 'translate(-50%, -50%)'; // Centre la bulle sur sa position
+    
+    const img = document.createElement('img');
+    img.src = member.photoUrl;
+    img.alt = member.name;
+    img.onerror = function() {
+      // Image de fallback si le chargement échoue
+      this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QaG90bzwvdGV4dD48L3N2Zz4=';
+    };
+    
+    bubble.appendChild(img);
     bubble.addEventListener('click', (e) => {
       e.stopPropagation();
       openCentralBubble(member);
     });
     
-    // Stocker la position originale pour l'animation de répulsion
-    bubble.dataset.originalX = x;
-    bubble.dataset.originalY = y;
-    bubble.dataset.centerX = centerX;
-    bubble.dataset.centerY = centerY;
-    
     bubblesContainer.appendChild(bubble);
   });
 }
+
+// Supprimer l'écouteur de redimensionnement existant qui recrée les bulles
+// car maintenant elles sont en pourcentages et s'adaptent automatiquement
 
 // Création de la bulle centrale
 function createCentralBubble() {
@@ -314,4 +323,5 @@ window.addEventListener('resize', function() {
 
 // Démarrer la création périodique de flocons
 setInterval(createSnowflakes, 20000);
+
 
