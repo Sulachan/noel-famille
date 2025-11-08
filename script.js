@@ -1,10 +1,10 @@
 // Configuration des membres de la famille
 const familyMembers = [
-  { id: 'person1', name: 'Maman', photoUrl: 'https://i.imgur.com/88Fx119.jpeg' },
-  { id: 'person2', name: 'Papa', photoUrl: 'https://i.imgur.com/lEa3Dky.jpeg' },
-  { id: 'person3', name: 'Anton', photoUrl: 'https://i.imgur.com/3SN6pX7.jpeg' },
-  { id: 'person4', name: 'Ewan', photoUrl: 'https://i.imgur.com/VzvtbSu.jpeg' },
-  { id: 'person5', name: 'Sara', photoUrl: 'https://i.imgur.com/rwnpdOV.jpeg' }
+  { id: 'person1', name: 'Personne 1', photoUrl: 'https://i.imgur.com/photo1.jpg' },
+  { id: 'person2', name: 'Personne 2', photoUrl: 'https://i.imgur.com/photo2.jpg' },
+  { id: 'person3', name: 'Personne 3', photoUrl: 'https://i.imgur.com/photo3.jpg' },
+  { id: 'person4', name: 'Personne 4', photoUrl: 'https://i.imgur.com/photo4.jpg' },
+  { id: 'person5', name: 'Personne 5', photoUrl: 'https://i.imgur.com/photo5.jpg' }
 ];
 
 // Variables globales
@@ -26,10 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
   createSnowflakes();
 });
 
-// Création des bulles des membres en cercle, avec positionnement en pourcentages
+// Création des bulles des membres en cercle avec positionnement en pourcentages
 function createBubbles() {
   const bubblesContainer = document.getElementById('bubbles');
-  bubblesContainer.innerHTML = '';
   
   // Positions en pourcentages pour un placement responsive
   const positions = [
@@ -47,28 +46,19 @@ function createBubbles() {
     bubble.className = 'bulle';
     bubble.style.left = position.left;
     bubble.style.top = position.top;
-    bubble.style.transform = 'translate(-50%, -50%)'; // Centre la bulle sur sa position
-    
-    const img = document.createElement('img');
-    img.src = member.photoUrl;
-    img.alt = member.name;
-    img.onerror = function() {
-      // Image de fallback si le chargement échoue
-      this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2VlZWVlZSIvPjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjQiIGZpbGw9IiM5OTk5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5QaG90bzwvdGV4dD48L3N2Zz4=';
-    };
-    
-    bubble.appendChild(img);
+    bubble.innerHTML = `<img src="${member.photoUrl}" alt="${member.name}">`;
     bubble.addEventListener('click', (e) => {
       e.stopPropagation();
       openCentralBubble(member);
     });
     
+    // Stocker la position pour l'animation de répulsion
+    bubble.dataset.left = position.left;
+    bubble.dataset.top = position.top;
+    
     bubblesContainer.appendChild(bubble);
   });
 }
-
-// Supprimer l'écouteur de redimensionnement existant qui recrée les bulles
-// car maintenant elles sont en pourcentages et s'adaptent automatiquement
 
 // Création de la bulle centrale
 function createCentralBubble() {
@@ -97,28 +87,28 @@ function createCentralBubble() {
 // Effet de répulsion corrigé sur les bulles extérieures
 function applyRepulsion() {
   const bubbles = document.querySelectorAll('.bulle');
-  const centerX = window.innerWidth / 2;
-  const centerY = window.innerHeight / 2;
+  const centerX = 50; // Centre en pourcentage
+  const centerY = 50;
   
   bubbles.forEach(bubble => {
-    const originalX = parseFloat(bubble.dataset.originalX);
-    const originalY = parseFloat(bubble.dataset.originalY);
+    const left = parseFloat(bubble.dataset.left);
+    const top = parseFloat(bubble.dataset.top);
     
     // Calculer la direction de répulsion (opposée au centre)
-    const dirX = originalX - centerX;
-    const dirY = originalY - centerY;
+    const dirX = left - centerX;
+    const dirY = top - centerY;
     const distance = Math.sqrt(dirX * dirX + dirY * dirY);
     
     // Normaliser la direction
     const normX = dirX / distance;
     const normY = dirY / distance;
     
-    // Distance de répulsion (proportionnelle à la taille des bulles)
-    const repulsionDistance = 50;
+    // Distance de répulsion en pourcentage
+    const repulsionDistance = 2;
     
     // Appliquer les valeurs CSS personnalisées pour l'animation
-    bubble.style.setProperty('--translate-x', `${normX * repulsionDistance}px`);
-    bubble.style.setProperty('--translate-y', `${normY * repulsionDistance}px`);
+    bubble.style.setProperty('--translate-x', `${normX * repulsionDistance}vw`);
+    bubble.style.setProperty('--translate-y', `${normY * repulsionDistance}vh`);
     
     // Forcer un reflow
     void bubble.offsetWidth;
@@ -172,7 +162,7 @@ function showCentralBubble() {
   // Appliquer l'effet de répulsion aux bulles extérieures
   setTimeout(() => {
     applyRepulsion();
-  }, 100); // Petit délai pour synchroniser avec l'ouverture
+  }, 100);
 }
 
 // Fermeture de la bulle centrale
@@ -314,14 +304,5 @@ function createSnowflake(container, index) {
   }, index * 500);
 }
 
-// Redimensionnement des bulles si la fenêtre change de taille
-window.addEventListener('resize', function() {
-  const bubblesContainer = document.getElementById('bubbles');
-  bubblesContainer.innerHTML = '';
-  createBubbles();
-});
-
 // Démarrer la création périodique de flocons
 setInterval(createSnowflakes, 20000);
-
-
